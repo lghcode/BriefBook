@@ -1,0 +1,18 @@
+package com.lghcode.briefbook;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * @author lgh
+ */
+@SpringBootApplication
+@MapperScan("com.lghcode.briefbook.mapper")
+public class BriefbookApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(BriefbookApplication.class, args);
+    }
+
+}
