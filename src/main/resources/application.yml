@@ -20,3 +20,12 @@ logging:
 #mybatis
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
+
+#oss
+oss:
+  endpoint: http://oss-cn-hangzhou.aliyuncs.com
+  accessKeyId: LTAItTfvXFdSEtAT #AccessKey
+  accessKeySecret: ZFudNKdhnkJcaTYq1QjuYPQ0e4HZZD  #Accesssecret
+  bucketName: lgh-chat-im # bucket名称
+  filePath: briefBook    #bucket下文件夹的路径
+  domain: lgh-chat-im.oss-cn-hangzhou.aliyuncs.com #文件访问域名前缀
