@@ -1,4 +1,4 @@
-#Êı¾İÔ´ÅäÖÃ
+#datasource setting
 spring:
   datasource:
     url: jdbc:p6spy:mysql://lghcode.cn:3306/janeBook?characterEncoding=utf-8&useSSL=false
