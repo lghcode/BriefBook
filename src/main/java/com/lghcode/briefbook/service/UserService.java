@@ -30,12 +30,12 @@ public interface UserService {
     User getUserByMobileAndMd5Str(String mobile, String md5Str);
 
     /**
-     * 根据用户的id跟新昵称
+     * 根据用户的id更新昵称
      *
      * @Author laiyou
      * @param id      用户id
      * @param nickname  昵称
-     * @return  int
+     * @return void
      * @Date 2020/8/10 15.37
      */
      void updateNicknameById(Long id,String nickname);

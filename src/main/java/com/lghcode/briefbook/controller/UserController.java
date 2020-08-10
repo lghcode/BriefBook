@@ -56,6 +56,15 @@ public class UserController {
         return ResultJson.success("登录成功",currUser);
     }
 
+    /**
+     * 更改昵称--用户id和昵称
+     * @Author laiyou
+     * @param id
+     * @param nickname
+     * @return
+     * @Date 2020/8/10 16:42
+     */
+
     @PostMapping("/upNickname")
     public ResultJson upNickname(Long id,String nickname){
         //对参数进行空值校验
