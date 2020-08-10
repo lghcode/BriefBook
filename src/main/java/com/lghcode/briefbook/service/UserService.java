@@ -35,8 +35,7 @@ public interface UserService {
      * @Author laiyou
      * @param id      用户id
      * @param nickname  昵称
-     * @return void
-     * @Date 2020/8/10 15.37
+     * @Date 2020/8/10 15:37
      */
      void updateNicknameById(Long id,String nickname);
 }

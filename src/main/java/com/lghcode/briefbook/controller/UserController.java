@@ -59,9 +59,9 @@ public class UserController {
     /**
      * 更改昵称--用户id和昵称
      * @Author laiyou
-     * @param id
-     * @param nickname
-     * @return
+     * @param id  用户id
+     * @param nickname  昵称
+     * @return ResultJson
      * @Date 2020/8/10 16:42
      */
 
@@ -69,18 +69,14 @@ public class UserController {
     public ResultJson upNickname(Long id,String nickname){
         //对参数进行空值校验
 
-        if(StringUtils.isEmpty(nickname) ){
-            return ResultJson.error("参数不能为空");
+        if(StringUtils.isBlank(nickname)){
+            return ResultJson.error("昵称不能为空");
         }
         //判断用户id是否存在
         if(id == null){
             return ResultJson.error("用户id不能为空");
         }
 
-        //对昵称格式校验
-        if(StringUtils.isBlank(nickname)){
-            return ResultJson.error("昵称不能为空");
-        }
         try {
             userService.updateNicknameById(id, nickname);
         } catch (Exception e) {
