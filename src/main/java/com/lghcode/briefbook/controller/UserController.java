@@ -55,4 +55,32 @@ public class UserController {
         //登录成功
         return ResultJson.success("登录成功",currUser);
     }
+
+    @PostMapping("/upNickname")
+    public ResultJson upNickname(Long id,String nickname){
+        //对参数进行空值校验
+
+        if(StringUtils.isEmpty(nickname) ){
+            return ResultJson.error("参数不能为空");
+        }
+        //判断用户id是否存在
+        if(id == null){
+            return ResultJson.error("用户id不能为空");
+        }
+
+        //对昵称格式校验
+        if(StringUtils.isBlank(nickname)){
+            return ResultJson.error("昵称不能为空");
+        }
+        try {
+            userService.updateNicknameById(id, nickname);
+        } catch (Exception e) {
+            return ResultJson.error("昵称更新失败");
+        }
+        //登录成功
+        return ResultJson.success("昵称更新成功");
+
+
+    }
+
 }
