@@ -9,4 +9,6 @@ import com.lghcode.briefbook.model.User;
  */
 public interface UserMapper extends BaseMapper<User> {
 
+
+
 }
