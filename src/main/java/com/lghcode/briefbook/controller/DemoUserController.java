@@ -1,10 +1,12 @@
 package com.lghcode.briefbook.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.lghcode.briefbook.model.DemoUser;
 import com.lghcode.briefbook.service.DemoUserService;
 import com.lghcode.briefbook.util.AliyunOssUploadUtil;
 import com.lghcode.briefbook.util.ResultJson;
+import com.lghcode.briefbook.util.TencentSmsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,9 @@ public class DemoUserController {
 
     @Autowired
     private AliyunOssUploadUtil aliyunOssUploadUtil;
+
+    @Autowired
+    private TencentSmsUtil tencentSmsUtil;
 
 
     /**
@@ -63,6 +68,20 @@ public class DemoUserController {
             return ResultJson.error("上传失败");
         }
         return ResultJson.success("上传成功",uploadUrl);
+    }
+
+    @RequestMapping("/sendSms")
+    public ResultJson sendSms(String mobile) {
+        if (StringUtils.isBlank(mobile)) {
+            return ResultJson.error("手机号不能为空");
+        }
+        //生成6位验证码
+        String code = String.valueOf(RandomUtil.randomInt(1,999999));
+        boolean flag = tencentSmsUtil.sendSms(code,mobile);
+        if (!flag) {
+            return ResultJson.error("验证码发送失败");
+        }
+        return ResultJson.success("验证码发送成功");
     }
 
 }

@@ -11,39 +11,34 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @PropertySource(value = "classpath:application.yml",encoding = "utf-8")
-@ConfigurationProperties(prefix = "oss")
+@ConfigurationProperties(prefix = "tencent.sms")
 @Data
-public class AliyunConfigProperties {
+public class TencentSmsProperties {
 
     /**
-     * 节点域名
+     *腾讯云账户密钥对id
      */
-    private String endpoint;
+    private String secretId;
 
     /**
-     * AccessKey
+     *腾讯云账户密钥对key
      */
-    private String accessKeyId;
+    private String secretKey;
 
     /**
-     * Accesssecret
+     * 应用appId
      */
-    private String accessKeySecret;
+    private String sdkAppId;
 
     /**
-     * bucket名称
+     * 短信签名内容
      */
-    private String bucketName;
+    private String sign;
 
     /**
-     * bucket下文件夹的路径
+     * 短信模板id
      */
-    private String filePath;
-
-    /**
-     * 文件访问域名前缀域名
-     */
-    private String domain;
+    private String templateId;
 }
 
 
