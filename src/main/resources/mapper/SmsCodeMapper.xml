@@ -3,4 +3,9 @@
 <mapper namespace="com.lghcode.briefbook.mapper.SmsCodeMapper" >
 
 
+    <select id="selectByUserIdAndType" resultType="com.lghcode.briefbook.model.SmsCode">
+        select * from sms_code
+        where type = #{type}
+        and mobile in (select mobile from user where id = #{userId})
+    </select>
 </mapper>

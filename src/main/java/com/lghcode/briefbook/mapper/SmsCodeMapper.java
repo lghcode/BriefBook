@@ -2,6 +2,7 @@ package com.lghcode.briefbook.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lghcode.briefbook.model.SmsCode;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @Author lgh
@@ -9,4 +10,5 @@ import com.lghcode.briefbook.model.SmsCode;
  */
 public interface SmsCodeMapper extends BaseMapper<SmsCode> {
 
+    SmsCode selectByUserIdAndType(@Param("userId") Long userId, @Param("type") Integer type);
 }

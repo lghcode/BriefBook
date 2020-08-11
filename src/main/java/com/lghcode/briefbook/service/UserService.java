@@ -49,4 +49,16 @@ public interface UserService {
       * @Date 2020/8/11 16:27
       */
      boolean updateProfile(EditProfileParam editProfileParam);
+
+     /**
+      * 用户密码重置更新
+      *
+      * @Author laiyou
+      * @param id 用户id
+      * @param password 用户密码
+      * @return
+      * @Date 2020/8/11 19:27
+      */
+
+    void updateNewPwd(Long id, String password);
 }

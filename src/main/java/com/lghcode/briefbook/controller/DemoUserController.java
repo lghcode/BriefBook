@@ -96,7 +96,7 @@ public class DemoUserController {
         }
         //将信息同步到验证码表
         SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(0).createTime(new Date()).build();
-        smsCodeService.insert(smsCode);
+        smsCodeService.save(smsCode);
         return ResultJson.success("验证码发送成功");
     }
 

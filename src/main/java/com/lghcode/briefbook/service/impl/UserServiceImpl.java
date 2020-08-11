@@ -64,6 +64,9 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(user);
     }
 
+
+
+
     /**
      * 根据不同类型字段更新个人资料
      *
@@ -96,6 +99,23 @@ public class UserServiceImpl implements UserService {
         }
         int r = userMapper.updateById(resUser);
         return r > 0;
+    }
+
+    /**
+     * 用户密码重置更新
+     *
+     * @param id       用户id
+     * @param password 用户密码
+     * @return
+     * @Author laiyou
+     * @Date 2020/8/11 19:27
+     */
+    @Override
+    public void updateNewPwd(Long id, String password) {
+        User user = new User();
+        user.setId(id);
+        user.setPassword(password);
+        userMapper.updateById(user);
     }
 
 
