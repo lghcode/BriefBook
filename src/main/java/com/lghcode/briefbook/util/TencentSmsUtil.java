@@ -30,10 +30,11 @@ public class TencentSmsUtil {
      * @Author lghcode
      * @param  code 随机6位字符串
      * @param  mobile 手机号
+     * @param  tempId 短信模板id
      * @return boolean
      * @Date 2020/8/10 23:16
      */
-    public boolean sendSms(String code,String mobile) {
+    private boolean sendSms(String code, String mobile, String tempId) {
         try {
             Credential cred = new Credential(tencentSmsProperties.getSecretId(), tencentSmsProperties.getSecretKey());
 
@@ -59,8 +60,7 @@ public class TencentSmsUtil {
             req.setSign(sign);
 
             /* 模板 ID: 必须填写已审核通过的模板 ID，可登录 [短信控制台] 查看模板 ID */
-            String templateId = tencentSmsProperties.getTemplateId();
-            req.setTemplateID(templateId);
+            req.setTemplateID(tempId);
 
             /* 下发手机号码，采用 e.164 标准，+[国家或地区码][手机号]
              * 例如+8613711112222， 其中前面有一个+号 ，86为国家码，13711112222为手机号，最多不要超过200个手机号*/
@@ -90,5 +90,31 @@ public class TencentSmsUtil {
             log.info("=======>给{}发送短信验证码{}失败！", mobile, code);
             return false;
         }
+    }
+
+    /**
+     * 发送登录短信验证码
+     *
+     * @Author lghcode
+     * @param  code 随机6位字符串
+     * @param  mobile 手机号
+     * @return boolean
+     * @Date 2020/8/11 11:42
+     */
+    public boolean sendLoginSms(String code,String mobile) {
+        return sendSms(code,mobile,tencentSmsProperties.getLoginTemplateId());
+    }
+
+    /**
+     * 发送重置密码短信验证码
+     *
+     * @Author lghcode
+     * @param  code 随机6位字符串
+     * @param  mobile 手机号
+     * @return boolean
+     * @Date 2020/8/11 11:42
+     */
+    public boolean sendUpPwdSms(String code,String mobile) {
+        return sendSms(code,mobile,tencentSmsProperties.getUpPwdTemplateId());
     }
 }

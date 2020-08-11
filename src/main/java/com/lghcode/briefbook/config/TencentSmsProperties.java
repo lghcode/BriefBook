@@ -36,9 +36,14 @@ public class TencentSmsProperties {
     private String sign;
 
     /**
-     * 短信模板id
+     * 登录短信模板id
      */
-    private String templateId;
+    private String loginTemplateId;
+
+    /**
+     * 重置密码短信模板id
+     */
+    private String upPwdTemplateId;
 }
 
 

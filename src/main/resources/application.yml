@@ -37,4 +37,5 @@ tencent:
     secretKey: tZ07cqoW31lETUt2vRinb9a2E91iHagR #腾讯云账户密钥对key
     sdkAppId: 1400411815  #应用appId
     sign: 亮桂港佳伟  #短信签名内容
-    templateId: 686990  #短信模板id
+    loginTemplateId: 686990  #登录短信模板id
+    upPwdTemplateId: 687434  #重置密码短信模板id

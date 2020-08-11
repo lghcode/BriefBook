@@ -77,7 +77,7 @@ public class DemoUserController {
         }
         //生成6位验证码
         String code = String.valueOf(RandomUtil.randomInt(1,999999));
-        boolean flag = tencentSmsUtil.sendSms(code,mobile);
+        boolean flag = tencentSmsUtil.sendLoginSms(code,mobile);
         if (!flag) {
             return ResultJson.error("验证码发送失败");
         }
