@@ -1,7 +1,12 @@
 package com.lghcode.briefbook.controller;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.lghcode.briefbook.enums.EditProfileEnum;
+import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.model.User;
+import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.service.UserService;
+import com.lghcode.briefbook.util.DateUtil;
 import com.lghcode.briefbook.util.MD5Utils;
 import com.lghcode.briefbook.util.ResultJson;
 import org.apache.commons.lang3.StringUtils;
@@ -57,35 +62,52 @@ public class UserController {
     }
 
     /**
-     * 更改昵称--用户id和昵称
+     * 编辑个人资料
      * @Author laiyou
-     * @param id  用户id
-     * @param nickname  昵称
+     * @param editProfileParam  编辑个人资料请求参数
      * @return ResultJson
      * @Date 2020/8/10 16:42
      */
-
-    @PostMapping("/upNickname")
-    public ResultJson upNickname(Long id,String nickname){
+    @PostMapping("/editProfile")
+    public ResultJson editProfile(EditProfileParam editProfileParam){
         //对参数进行空值校验
-
-        if(StringUtils.isBlank(nickname)){
-            return ResultJson.error("昵称不能为空");
+        if (ObjectUtil.isEmpty(editProfileParam)) {
+            return ResultJson.error("参数不能为空");
         }
-        //判断用户id是否存在
-        if(id == null){
-            return ResultJson.error("用户id不能为空");
+        if (editProfileParam.getUserId() == null ||
+                editProfileParam.getEditType() == null ||
+                StringUtils.isBlank(editProfileParam.getEditValue())){
+            return ResultJson.error("参数不能为空");
         }
-
-        try {
-            userService.updateNicknameById(id, nickname);
-        } catch (Exception e) {
-            return ResultJson.error("昵称更新失败");
+        //校验性别参数格式
+        if (editProfileParam.getEditType() == EditProfileEnum.EDIT_SEX.getCode()
+            && !checkSexValueFormat(editProfileParam.getEditValue())) {
+                return ResultJson.error("性别参数不合法");
         }
-        //登录成功
-        return ResultJson.success("昵称更新成功");
+        //校验生日参数格式
+        if (editProfileParam.getEditType() == EditProfileEnum.EDIT_BIRTHDAY.getCode()
+                && !DateUtil.isRqFormat(editProfileParam.getEditValue())) {
+            return ResultJson.error("生日参数不合法");
+        }
+        boolean isSuc = userService.updateProfile(editProfileParam);
+        if (!isSuc) {
+            return ResultJson.error(EditProfileEnum.getEnumDescByCode(editProfileParam.getEditType())+"失败");
+        }
+        return ResultJson.success(EditProfileEnum.getEnumDescByCode(editProfileParam.getEditType())+"成功");
+    }
 
-
+    /**
+     * 校验性别参数是否为 "0" "1" "2"
+     *
+     * @Author lghcode
+     * @param  sexValue 性别参数
+     * @return boolean
+     * @Date 2020/8/11 18:18
+     */
+    private boolean checkSexValueFormat(String sexValue){
+        return String.valueOf(UserEnum.SEX_SECRET.getCode()).equals(sexValue)
+                || String.valueOf(UserEnum.SEX_MALE.getCode()).equals(sexValue)
+                || String.valueOf(UserEnum.SEX_FEMALE.getCode()).equals(sexValue);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.lghcode.briefbook.util;
 
 import com.lghcode.briefbook.config.TencentSmsProperties;
+import com.lghcode.briefbook.constant.TencentSmsConstant;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.common.profile.ClientProfile;
@@ -68,7 +69,7 @@ public class TencentSmsUtil {
             req.setPhoneNumberSet(phoneNumbers);
 
             /* 模板参数: 若无模板参数，则设置为空*/
-            String[] templateParams = {code, "15"};
+            String[] templateParams = {code, TencentSmsConstant.VALID_PERIOD};
             req.setTemplateParamSet(templateParams);
 
             /* 通过 client 对象调用 SendSms 方法发起请求。注意请求方法名与请求对象是对应的

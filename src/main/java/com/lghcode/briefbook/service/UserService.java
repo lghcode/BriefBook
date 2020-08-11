@@ -1,6 +1,7 @@
 package com.lghcode.briefbook.service;
 
 import com.lghcode.briefbook.model.User;
+import com.lghcode.briefbook.model.param.EditProfileParam;
 
 /**
  * @Author lgh
@@ -38,4 +39,14 @@ public interface UserService {
      * @Date 2020/8/10 15:37
      */
      void updateNicknameById(Long id,String nickname);
+
+     /**
+      * 根据不同类型字段更新个人资料
+      *
+      * @Author lghcode
+      * @param  editProfileParam 更新资料参数
+      * @return boolean
+      * @Date 2020/8/11 16:27
+      */
+     boolean updateProfile(EditProfileParam editProfileParam);
 }
