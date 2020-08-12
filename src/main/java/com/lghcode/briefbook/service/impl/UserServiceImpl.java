@@ -170,4 +170,35 @@ public class UserServiceImpl implements UserService {
                 .ne(User::getId,userId));
         return count > 0;
     }
+
+    /**
+     * 判断要更换的手机号是否已经被人注册
+     *
+     * @param id 用户id
+     * @param newMobile 新手机号
+     * @return Boolean
+     * @Author laiyou
+     * @Date 2020/8/13 0:05
+     */
+    @Override
+    public Boolean checkIsNewMobile(Long id, String newMobile) {
+        User user = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId,id).eq(User::getMobile, newMobile));
+        return user != null;
+    }
+
+    /**
+     * 更新手机号
+     *
+     * @param id 用户id
+     * @param newMobile 新手机号
+     * @Author laiyou
+     * @Date 2020/8/13 0:13
+     */
+    @Override
+    public void saveNewMobile(Long id, String newMobile) {
+        User user = new User();
+        user.setId(id);
+        user.setMobile(newMobile);
+        userMapper.updateById(user);
+    }
 }

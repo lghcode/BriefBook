@@ -278,5 +278,52 @@ public class UserController {
                 || String.valueOf(UserEnum.SEX_MALE.getCode()).equals(sexValue)
                 || String.valueOf(UserEnum.SEX_FEMALE.getCode()).equals(sexValue);
     }
+    /**
+     * 更换注册手机号
+     *
+     * @Author laiyou
+     * @param id 用户id
+     * @param code 用户输入的短信验证码
+     * @param newMobile 用户的新手机号
+     * @return ResultJson
+     * @Date 2020/8/12 23:40
+     */
+    @PostMapping("/updateMobile")
+    private ResultJson updateMobile(Long id,String code,String newMobile){
+        //参数校验
+        if (id == null || StringUtils.isBlank(code) || StringUtils.isBlank(newMobile)){
+            return ResultJson.error("参数不能为空");
+        }
+        //根据用户id查询用户手机号
+        String userMobile = userService.getMobileByUserId(id);
+        //得到SmsCode
+         SmsCode resultSmsCode = smsCodeService.getByMobileAndType(userMobile,SendSmsEnum.UPMOBILE_SMS.getCode());
+        if (resultSmsCode == null){
+            return ResultJson.error("更新失败,请获取验证码");
+        }
+        //检验验证码是否过期
+        long sendCodeTime = resultSmsCode.getCreateTime().getTime();
+        long nowTime = System.currentTimeMillis();
+        if ((nowTime - sendCodeTime)>(TencentSmsConstant.PERIOD_OF_VALIDITY)){
+            return ResultJson.error("验证码已过期，请重新发送");
+        }
+        //校验验证码是否输入正确
+        String realCode = resultSmsCode.getCode();
+        if (!MD5Utils.getMD5Str(code).equals(realCode)) {
+            return ResultJson.error("验证码输入有误");
+        }
+        //判断要更换的手机号是否已经被人注册
+        Boolean existMobile = userService.checkIsNewMobile(id,newMobile);
+        if (existMobile){
+            return ResultJson.error("该手机已经被注册了，请重更新输入该号码");
+        }
+        //更新手机号
+        try {
+            userService.saveNewMobile(id,newMobile);
+        } catch (Exception e) {
+            return ResultJson.error("手机号跟新失败");
+        }
+        return ResultJson.success("手机号已经更换成功");
 
+    }
 }
