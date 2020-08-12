@@ -73,54 +73,29 @@ public class UserController {
     }
 
     /**
-     * 更改昵称--用户id和昵称
-     * @Author laiyou
-     * @param id  用户id
-     * @param nickname  昵称
-     * @return ResultJson
-     * @Date 2020/8/10 16:42
-     */
-
-    @PostMapping("/upNickname")
-    public ResultJson upNickname(Long id,String nickname){
-        //对参数进行空值校验
-
-        if(StringUtils.isBlank(nickname)){
-            return ResultJson.error("昵称不能为空");
-        }
-        //判断用户id是否存在
-        if(id == null){
-            return ResultJson.error("用户id不能为空");
-        }
-
-        try {
-            userService.updateNicknameById(id, nickname);
-        } catch (Exception e) {
-            return ResultJson.error("昵称更新失败");
-        }
-        //登录成功
-        return ResultJson.success("昵称更新成功");
-
-
-    }
-
-
-    /**
-     * 发送重置密码的验证码
-     * @Author laiyou
+     * 发送短信验证码
+     * @Author lghcode
      * @param mobile 手机号
+     * @param smsType 验证码类型，0-登录，1-重置密码
      * @return ResultJson
      * @Date 2020/8/11 14:14
      */
-    @PostMapping("/sendUpPwdSms")
-    public ResultJson sendUpPwdSms(String mobile){
+    @PostMapping("/sendSms")
+    public ResultJson sendUpPwdSms(String mobile,Integer smsType) {
         if (StringUtils.isBlank(mobile)){
             return  ResultJson.error("手机号不能为空");
         }
-        //判断手机号是否存在
-        boolean mobileExis = userService.checkUserMobileExist(mobile);
-        if (!mobileExis) {
-            return ResultJson.error("手机号未注册");
+        if (smsType == null ||
+                smsType > SendSmsEnum.RESET_SMS.getCode() ||
+                smsType < SendSmsEnum.LOGIN_SMS.getCode()) {
+            return ResultJson.error("验证码类型不合法");
+        }
+        //如果短信验证码类型为重置密码，则判断手机号是否存在
+        if (smsType == SendSmsEnum.RESET_SMS.getCode()) {
+            boolean mobileExis = userService.checkUserMobileExist(mobile);
+            if (!mobileExis) {
+                return ResultJson.error("手机号未注册");
+            }
         }
         //判断当前手机号是否在1分钟之内已经发送过登录验证码
         boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.RESET_SMS.getCode(), DateUtil.getOneMintueBefore(),new Date());
@@ -129,12 +104,21 @@ public class UserController {
         }
         //生成6位验证码
         String code = String.valueOf(RandomUtil.randomInt(1,999999));
-        boolean flag = tencentSmsUtil.sendUpPwdSms(code,mobile);
-        if (!flag) {
-            return ResultJson.error("验证码发送失败");
+        //发送登录时的验证码
+        if (smsType == SendSmsEnum.LOGIN_SMS.getCode()) {
+            boolean flag = tencentSmsUtil.sendLoginSms(code,mobile);
+            if (!flag) {
+                return ResultJson.error("验证码发送失败");
+            }
+        }else{
+            //发送重置密码时的验证码
+            boolean flag = tencentSmsUtil.sendUpPwdSms(code,mobile);
+            if (!flag) {
+                return ResultJson.error("验证码发送失败");
+            }
         }
         //将信息同步到验证码表
-        SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(SendSmsEnum.RESET_SMS.getCode()).createTime(new Date()).build();
+        SmsCode smsCode = SmsCode.builder().mobile(mobile).code(MD5Utils.getMD5Str(code)).type(smsType).createTime(new Date()).build();
         smsCodeService.save(smsCode);
         return ResultJson.success("验证码发送成功");
 
@@ -156,7 +140,7 @@ public class UserController {
             return ResultJson.error("参数不能为空");
         }
         //得到SmsCode
-        SmsCode resultSmsCode = smsCodeService.getByUserIdAndType(id,1);
+        SmsCode resultSmsCode = smsCodeService.getByUserIdAndType(id,SendSmsEnum.RESET_SMS.getCode());
         if (resultSmsCode == null){
             return ResultJson.error("更新失败");
         }
@@ -168,7 +152,7 @@ public class UserController {
         }
         //校验验证码是否输入正确
         String realCode = resultSmsCode.getCode();
-        if (!code.equals(realCode)) {
+        if (!MD5Utils.getMD5Str(code).equals(realCode)) {
             return ResultJson.error("验证码输入有误");
         }
         //验证码正确，修改密码

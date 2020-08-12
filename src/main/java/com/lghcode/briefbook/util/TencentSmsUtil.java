@@ -74,21 +74,21 @@ public class TencentSmsUtil {
 
             /* 通过 client 对象调用 SendSms 方法发起请求。注意请求方法名与请求对象是对应的
              * 返回的 res 是一个 SendSmsResponse 类的实例，与请求对象对应 */
-            log.info("==========>开始给{}发送短信验证码：{}", mobile, code);
+            log.info("==========>开始给{}发送短信验证码(密文)：{}", mobile, MD5Utils.getMD5Str(code));
             SendSmsResponse res = client.SendSms(req);
             log.info("==========>短信发送完毕,{}", SendSmsResponse.toJsonString(res));
             // 可以取出单个值，您可以通过官网接口文档或跳转到 response 对象的定义处查看返回字段的定义
             SendStatus sendStatus = res.getSendStatusSet()[0];
             String c = sendStatus.getCode();
             if (!"Ok".equals(c)) {
-                log.info("=======>给{}发送短信验证码{}失败！", mobile, code);
+                log.info("=======>给{}发送短信验证码(密文){}失败！", mobile, MD5Utils.getMD5Str(code));
                 return false;
             }
-            log.info("=======>给{}发送短信验证码{}成功！", mobile, code);
+            log.info("=======>给{}发送短信验证码(密文){}成功！", mobile, MD5Utils.getMD5Str(code));
             return true;
         } catch (TencentCloudSDKException e) {
             e.printStackTrace();
-            log.info("=======>给{}发送短信验证码{}失败！", mobile, code);
+            log.info("=======>给{}发送短信验证码(密文){}失败！", mobile, MD5Utils.getMD5Str(code));
             return false;
         }
     }
