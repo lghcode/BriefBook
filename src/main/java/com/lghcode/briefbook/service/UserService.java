@@ -30,16 +30,6 @@ public interface UserService {
      */
     User getUserByMobileAndMd5Str(String mobile, String md5Str);
 
-    /**
-     * 根据用户的id更新昵称
-     *
-     * @Author laiyou
-     * @param id      用户id
-     * @param nickname  昵称
-     * @Date 2020/8/10 15:37
-     */
-     void updateNicknameById(Long id,String nickname);
-
      /**
       * 根据不同类型字段更新个人资料
       *
@@ -56,9 +46,48 @@ public interface UserService {
       * @Author laiyou
       * @param id 用户id
       * @param password 用户密码
-      * @return
       * @Date 2020/8/11 19:27
       */
 
     void updateNewPwd(Long id, String password);
+
+    /**
+     * 根据用户id查询用户手机号
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return String 用户手机号
+     * @Date 2020/8/12 16:39
+     */
+    String getMobileByUserId(Long userId);
+
+    /**
+     * 用户第一次登录进行默认注册
+     *
+     * @Author lghcode
+     * @param  mobile 手机号
+     * @Date 2020/8/12 17:16
+     */
+    void defaultRegister(String mobile);
+
+    /**
+     * 根据手机号查找用户
+     *
+     * @Author lghcode
+     * @param mobile 用户手机号
+     * @return User
+     * @Date 2020/8/12 17:49
+     */
+    User getUserByMobile(String mobile);
+
+    /**
+     * 校验某用户要更改的新昵称是否被其他人占用
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @param  nickName 用户昵称
+     * @return boolean
+     * @Date 2020/8/12 18:05
+     */
+    boolean checkUserNickNameIsRepeat(Long userId, String nickName);
 }

@@ -47,16 +47,18 @@ public class SmsCodeServiceImpl implements SmsCodeService {
     }
 
     /**
-     * 根据用户id和type去查询单个用户
+     * 根据用户手机号和type去查询验证码记录
      *
-     * @param userId 用户id
+     * @param mobile 手机号
      * @param type   验证码发送类型
      * @return SmsCode
-     * @Author laiyou
-     * @Date 2020/8/11 17:53
+     * @Author lghcode
+     * @Date 2020/8/12 16:32
      */
     @Override
-    public SmsCode getByUserIdAndType(Long userId, Integer type) {
-        return smsCodeMapper.selectByUserIdAndType(userId,type);
+    public SmsCode getByMobileAndType(String mobile, Integer type) {
+        return smsCodeMapper.selectOne(new QueryWrapper<SmsCode>().lambda()
+                .eq(SmsCode::getMobile,mobile)
+                .eq(SmsCode::getType,type));
     }
 }

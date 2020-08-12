@@ -39,6 +39,54 @@ public class UserController {
     private SmsCodeService smsCodeService;
 
     /**
+     * 用户登录(手机号验证码登录)
+     *
+     * @Author lghcode
+     * @param  mobile 手机号
+     * @param  code 验证码
+     * @return ResultJson
+     * @Date 2020/8/12 18:49
+     */
+    @PostMapping("/loginSms")
+    public ResultJson loginSms(String mobile,String code){
+        if (StringUtils.isBlank(mobile) || StringUtils.isBlank(code)) {
+            return ResultJson.error("参数不能为空");
+        }
+        if (!CommonUtil.isMobile(mobile)) {
+            return  ResultJson.error("手机号不合法");
+        }
+        //得到SmsCode
+        SmsCode smsCode = smsCodeService.getByMobileAndType(mobile,SendSmsEnum.LOGIN_SMS.getCode());
+        if (smsCode == null){
+            return ResultJson.error("没有找到该手机号的验证码记录");
+        }
+        //检验验证码是否过期
+        long sendCodeTime = smsCode.getCreateTime().getTime();
+        long nowTime = System.currentTimeMillis();
+        if ((nowTime - sendCodeTime)>(TencentSmsConstant.PERIOD_OF_VALIDITY)){
+            return ResultJson.error("验证码已过期，请重新发送");
+        }
+        //校验验证码是否输入正确
+        String realCode = smsCode.getCode();
+        if (!MD5Utils.getMD5Str(code).equals(realCode)) {
+            return ResultJson.error("验证码输入有误");
+        }
+        //判断该手机号是否注册过
+        boolean isExist = userService.checkUserMobileExist(mobile);
+        //如果该手机号没注册过，则是新用户，需要进行默认注册
+        if (!isExist){
+            userService.defaultRegister(mobile);
+        }
+        //返回当前用户信息给前端
+        User currentUser = userService.getUserByMobile(mobile);
+        if (currentUser == null) {
+            return ResultJson.error("该账号已被注销");
+        }
+        currentUser.setPassword(null);
+        return ResultJson.success("登录成功",currentUser);
+    }
+
+    /**
      * 用户登录 -手机号密码
      *
      * @Author laiyou
@@ -59,7 +107,7 @@ public class UserController {
             return ResultJson.error("手机号未注册");
         }
         //判断密码是否正确
-        User currUser = null;
+        User currUser;
         try {
             currUser = userService.getUserByMobileAndMd5Str(mobile,MD5Utils.getMD5Str(password));
         } catch (Exception e) {
@@ -69,6 +117,7 @@ public class UserController {
             return ResultJson.error("密码输入错误");
         }
         //登录成功
+        currUser.setPassword(null);
         return ResultJson.success("登录成功",currUser);
     }
 
@@ -85,6 +134,9 @@ public class UserController {
         if (StringUtils.isBlank(mobile)){
             return  ResultJson.error("手机号不能为空");
         }
+        if (!CommonUtil.isMobile(mobile)) {
+            return  ResultJson.error("手机号不合法");
+        }
         if (smsType == null ||
                 smsType > SendSmsEnum.RESET_SMS.getCode() ||
                 smsType < SendSmsEnum.LOGIN_SMS.getCode()) {
@@ -98,7 +150,7 @@ public class UserController {
             }
         }
         //判断当前手机号是否在1分钟之内已经发送过登录验证码
-        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.RESET_SMS.getCode(), DateUtil.getOneMintueBefore(),new Date());
+        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.RESET_SMS.getCode(), CommonUtil.getOneMintueBefore(),new Date());
         if (isRepect) {
             return ResultJson.error("请不要在一分钟之内重复发送验证码");
         }
@@ -139,8 +191,10 @@ public class UserController {
         if (id == null || StringUtils.isBlank(code) || StringUtils.isBlank(newPassword)) {
             return ResultJson.error("参数不能为空");
         }
+        //根据用户id查询用户手机号
+        String userMobile = userService.getMobileByUserId(id);
         //得到SmsCode
-        SmsCode resultSmsCode = smsCodeService.getByUserIdAndType(id,SendSmsEnum.RESET_SMS.getCode());
+        SmsCode resultSmsCode = smsCodeService.getByMobileAndType(userMobile,SendSmsEnum.RESET_SMS.getCode());
         if (resultSmsCode == null){
             return ResultJson.error("更新失败");
         }
@@ -190,8 +244,13 @@ public class UserController {
         }
         //校验生日参数格式
         if (editProfileParam.getEditType() == EditProfileEnum.EDIT_BIRTHDAY.getCode()
-                && !DateUtil.isRqFormat(editProfileParam.getEditValue())) {
+                && !CommonUtil.isRqFormat(editProfileParam.getEditValue())) {
             return ResultJson.error("生日参数不合法");
+        }
+        //如果是更改昵称，则判断该用户新输入的昵称是否已经被其他人使用
+        if (editProfileParam.getEditType() == EditProfileEnum.EDIT_NICKNAME.getCode()
+                && userService.checkUserNickNameIsRepeat(editProfileParam.getUserId(),editProfileParam.getEditValue())) {
+            return ResultJson.error("该昵称已被占用");
         }
         boolean isSuc = userService.updateProfile(editProfileParam);
         if (!isSuc) {

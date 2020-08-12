@@ -32,15 +32,14 @@ public interface SmsCodeService {
      */
     boolean checkRepeatSendSms(String mobile, int type, Date oneMintueBefore, Date nowDate);
 
-
-   /**
-    * 根据用户id和type去查询单个用户
-    *
-    * @Author laiyou
-    * @param  userId 用户id
-    * @param  type 验证码发送类型
-    * @return  SmsCode
-    * @Date 2020/8/11 17:53
-    */
-    SmsCode getByUserIdAndType(Long userId, Integer type);
+    /**
+     * 根据用户手机号和type去查询验证码记录
+     *
+     * @Author lghcode
+     * @param  mobile 手机号
+     * @param  type 验证码发送类型
+     * @return SmsCode
+     * @Date 2020/8/12 16:32
+     */
+    SmsCode getByMobileAndType(String mobile, Integer type);
 }

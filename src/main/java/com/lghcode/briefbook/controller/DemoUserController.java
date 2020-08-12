@@ -8,7 +8,7 @@ import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.service.DemoUserService;
 import com.lghcode.briefbook.service.SmsCodeService;
 import com.lghcode.briefbook.util.AliyunOssUploadUtil;
-import com.lghcode.briefbook.util.DateUtil;
+import com.lghcode.briefbook.util.CommonUtil;
 import com.lghcode.briefbook.util.ResultJson;
 import com.lghcode.briefbook.util.TencentSmsUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -85,7 +85,7 @@ public class DemoUserController {
             return ResultJson.error("手机号不能为空");
         }
         //判断当前手机号是否在1分钟之内已经发送过登录验证码
-        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.LOGIN_SMS.getCode(), DateUtil.getOneMintueBefore(),new Date());
+        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.LOGIN_SMS.getCode(), CommonUtil.getOneMintueBefore(),new Date());
         if (isRepect) {
             return ResultJson.error("请不要在一分钟之内重复发送验证码");
         }
