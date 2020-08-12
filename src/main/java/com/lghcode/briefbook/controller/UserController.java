@@ -125,7 +125,7 @@ public class UserController {
      * 发送短信验证码
      * @Author lghcode
      * @param mobile 手机号
-     * @param smsType 验证码类型，0-登录，1-重置密码
+     * @param smsType 验证码类型，0-登录，1-重置密码，2-更换手机号
      * @return ResultJson
      * @Date 2020/8/11 14:14
      */
@@ -138,7 +138,7 @@ public class UserController {
             return  ResultJson.error("手机号不合法");
         }
         if (smsType == null ||
-                smsType > SendSmsEnum.RESET_SMS.getCode() ||
+                smsType > SendSmsEnum.UPMOBILE_SMS.getCode() ||
                 smsType < SendSmsEnum.LOGIN_SMS.getCode()) {
             return ResultJson.error("验证码类型不合法");
         }
@@ -162,9 +162,15 @@ public class UserController {
             if (!flag) {
                 return ResultJson.error("验证码发送失败");
             }
-        }else{
+        }else if(smsType == SendSmsEnum.RESET_SMS.getCode()){
             //发送重置密码时的验证码
             boolean flag = tencentSmsUtil.sendUpPwdSms(code,mobile);
+            if (!flag) {
+                return ResultJson.error("验证码发送失败");
+            }
+        }else if(smsType == SendSmsEnum.UPMOBILE_SMS.getCode()){
+            //发送更换手机号时的验证码
+            boolean flag = tencentSmsUtil.sendUpMobileSms(code,mobile);
             if (!flag) {
                 return ResultJson.error("验证码发送失败");
             }

@@ -10,7 +10,8 @@ public enum SendSmsEnum implements BaseEnum{
      * 验证码发送场景类型枚举
      */
     LOGIN_SMS(0,"登录验证码"),
-    RESET_SMS(1,"重置密码验证码")
+    RESET_SMS(1,"重置密码验证码"),
+    UPMOBILE_SMS(2,"更换手机号验证码")
     ;
 
 

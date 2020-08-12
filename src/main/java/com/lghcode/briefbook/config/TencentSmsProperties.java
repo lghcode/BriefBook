@@ -44,6 +44,11 @@ public class TencentSmsProperties {
      * 重置密码短信模板id
      */
     private String upPwdTemplateId;
+
+    /**
+     * 更换手机号短信模板id
+     */
+    private String upMobileTemplateId;
 }
 
 

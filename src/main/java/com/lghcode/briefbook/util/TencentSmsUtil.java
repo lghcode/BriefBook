@@ -118,4 +118,17 @@ public class TencentSmsUtil {
     public boolean sendUpPwdSms(String code,String mobile) {
         return sendSms(code,mobile,tencentSmsProperties.getUpPwdTemplateId());
     }
+
+    /**
+     * 发送更换手机号短信验证码
+     *
+     * @Author lghcode
+     * @param  code 随机6位字符串
+     * @param  mobile 手机号
+     * @return boolean
+     * @Date 2020/8/11 11:42
+     */
+    public boolean sendUpMobileSms(String code,String mobile) {
+        return sendSms(code,mobile,tencentSmsProperties.getUpMobileTemplateId());
+    }
 }
