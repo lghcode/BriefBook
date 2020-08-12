@@ -2,6 +2,7 @@ package com.lghcode.briefbook.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.lghcode.briefbook.enums.SendSmsEnum;
 import com.lghcode.briefbook.model.DemoUser;
 import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.service.DemoUserService;
@@ -84,7 +85,7 @@ public class DemoUserController {
             return ResultJson.error("手机号不能为空");
         }
         //判断当前手机号是否在1分钟之内已经发送过登录验证码
-        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile,0, DateUtil.getOneMintueBefore(),new Date());
+        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.LOGIN_SMS.getCode(), DateUtil.getOneMintueBefore(),new Date());
         if (isRepect) {
             return ResultJson.error("请不要在一分钟之内重复发送验证码");
         }
@@ -95,7 +96,7 @@ public class DemoUserController {
             return ResultJson.error("验证码发送失败");
         }
         //将信息同步到验证码表
-        SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(0).createTime(new Date()).build();
+        SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(SendSmsEnum.LOGIN_SMS.getCode()).createTime(new Date()).build();
         smsCodeService.save(smsCode);
         return ResultJson.success("验证码发送成功");
     }

@@ -2,7 +2,9 @@ package com.lghcode.briefbook.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.lghcode.briefbook.constant.TencentSmsConstant;
 import com.lghcode.briefbook.enums.EditProfileEnum;
+import com.lghcode.briefbook.enums.SendSmsEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.model.User;
@@ -106,7 +108,7 @@ public class UserController {
     /**
      * 发送重置密码的验证码
      * @Author laiyou
-     * @param mobile
+     * @param mobile 手机号
      * @return ResultJson
      * @Date 2020/8/11 14:14
      */
@@ -121,7 +123,7 @@ public class UserController {
             return ResultJson.error("手机号未注册");
         }
         //判断当前手机号是否在1分钟之内已经发送过登录验证码
-        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile,1, DateUtil.getOneMintueBefore(),new Date());
+        boolean isRepect = smsCodeService.checkRepeatSendSms(mobile, SendSmsEnum.RESET_SMS.getCode(), DateUtil.getOneMintueBefore(),new Date());
         if (isRepect) {
             return ResultJson.error("请不要在一分钟之内重复发送验证码");
         }
@@ -132,7 +134,7 @@ public class UserController {
             return ResultJson.error("验证码发送失败");
         }
         //将信息同步到验证码表
-        SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(1).createTime(new Date()).build();
+        SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(SendSmsEnum.RESET_SMS.getCode()).createTime(new Date()).build();
         smsCodeService.save(smsCode);
         return ResultJson.success("验证码发送成功");
 
@@ -161,7 +163,7 @@ public class UserController {
         //检验验证码是否过期
         long sendCodeTime = resultSmsCode.getCreateTime().getTime();
         long nowTime = System.currentTimeMillis();
-        if ((nowTime - sendCodeTime)>(15 * 60 * 1000)){
+        if ((nowTime - sendCodeTime)>(TencentSmsConstant.PERIOD_OF_VALIDITY)){
             return ResultJson.error("验证码已过期，请重新发送");
         }
         //校验验证码是否输入正确

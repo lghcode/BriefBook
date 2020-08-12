@@ -8,7 +8,10 @@ package com.lghcode.briefbook.constant;
 public class TencentSmsConstant {
 
     /**
-     * 短信验证码有效期
+     * 短信验证码有效期 15 分钟
      */
     public static final String VALID_PERIOD = "15";
+
+
+    public static final long  PERIOD_OF_VALIDITY = 15 * 60 * 1000;
 }
