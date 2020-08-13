@@ -90,23 +90,25 @@ public interface UserService {
      * @Date 2020/8/12 18:05
      */
     boolean checkUserNickNameIsRepeat(Long userId, String nickName);
-/**
- * 判断要更换的手机号是否已经被人注册
- *
- * @Author laiyou
- * @param id 用户id
- * @param newMobile 新手机号
- * @return Boolean
- * @Date 2020/8/13 0:05
- */
+
+    /**
+     * 判断要更换的手机号是否已经被人注册
+     *
+     * @Author laiyou
+     * @param id 用户id
+     * @param newMobile 新手机号
+     * @return Boolean
+     * @Date 2020/8/13 0:05
+     */
     Boolean checkIsNewMobile(Long id, String newMobile);
-/**
- *更新手机号
- *
- * @Author laiyou
- * @param id   用户id
- * @param newMobile 新手机号
- * @Date 2020/8/13 0:13
- */
+
+    /**
+     *更新手机号
+     *
+     * @Author laiyou
+     * @param id   用户id
+     * @param newMobile 新手机号
+     * @Date 2020/8/13 0:13
+     */
     void saveNewMobile(Long id, String newMobile);
 }

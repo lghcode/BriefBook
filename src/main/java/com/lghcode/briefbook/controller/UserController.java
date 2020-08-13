@@ -278,6 +278,7 @@ public class UserController {
                 || String.valueOf(UserEnum.SEX_MALE.getCode()).equals(sexValue)
                 || String.valueOf(UserEnum.SEX_FEMALE.getCode()).equals(sexValue);
     }
+
     /**
      * 更换注册手机号
      *
@@ -289,10 +290,13 @@ public class UserController {
      * @Date 2020/8/12 23:40
      */
     @PostMapping("/updateMobile")
-    private ResultJson updateMobile(Long id,String code,String newMobile){
+    public ResultJson updateMobile(Long id,String code,String newMobile){
         //参数校验
         if (id == null || StringUtils.isBlank(code) || StringUtils.isBlank(newMobile)){
             return ResultJson.error("参数不能为空");
+        }
+        if (!CommonUtil.isMobile(newMobile)) {
+            return  ResultJson.error("手机号不合法");
         }
         //根据用户id查询用户手机号
         String userMobile = userService.getMobileByUserId(id);
@@ -315,13 +319,13 @@ public class UserController {
         //判断要更换的手机号是否已经被人注册
         Boolean existMobile = userService.checkIsNewMobile(id,newMobile);
         if (existMobile){
-            return ResultJson.error("该手机已经被注册了，请重更新输入该号码");
+            return ResultJson.error("该手机已经被注册了，请重新输入该号码");
         }
         //更新手机号
         try {
             userService.saveNewMobile(id,newMobile);
         } catch (Exception e) {
-            return ResultJson.error("手机号跟新失败");
+            return ResultJson.error("手机号更新失败");
         }
         return ResultJson.success("手机号已经更换成功");
 

@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Boolean checkIsNewMobile(Long id, String newMobile) {
-        User user = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId,id).eq(User::getMobile, newMobile));
+        User user = userMapper.selectOne(new QueryWrapper<User>().lambda().ne(User::getId,id).eq(User::getMobile, newMobile));
         return user != null;
     }
 
