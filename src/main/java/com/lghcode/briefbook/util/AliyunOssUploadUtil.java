@@ -43,8 +43,8 @@ public class AliyunOssUploadUtil {
     public String upload(File file){
         log.info("=========>OSS文件上传开始："+file.getName());
         String endpoint = aliyunConfigProperties.getEndpoint();
-        String accessKeyId = aliyunConfigProperties.getAccessKeyId();
-        String accessKeySecret = aliyunConfigProperties.getAccessKeySecret();
+        String accessKeyId = CodeUtil.aesDecrypt(aliyunConfigProperties.getAccessKeyId(),"666");
+        String accessKeySecret = CodeUtil.aesDecrypt(aliyunConfigProperties.getAccessKeySecret(),"666");
         String bucketName = aliyunConfigProperties.getBucketName();
         String fileHost = aliyunConfigProperties.getFilePath();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -124,8 +124,8 @@ public class AliyunOssUploadUtil {
     public String deleteBlog(String fileKey){
         log.info("=========>OSS文件删除开始");
         String endpoint = aliyunConfigProperties.getEndpoint();
-        String accessKeyId = aliyunConfigProperties.getAccessKeyId();
-        String accessKeySecret = aliyunConfigProperties.getAccessKeySecret();
+        String accessKeyId = CodeUtil.aesDecrypt(aliyunConfigProperties.getAccessKeyId(),"666");
+        String accessKeySecret = CodeUtil.aesDecrypt(aliyunConfigProperties.getAccessKeySecret(),"666");
         String bucketName = aliyunConfigProperties.getBucketName();
         try {
             OSSClient ossClient = new OSSClient(endpoint,accessKeyId,accessKeySecret);
@@ -156,8 +156,8 @@ public class AliyunOssUploadUtil {
     public List<String> getObjectList(String bucketName){
         List<String> listRe = new ArrayList<>();
         String endpoint = aliyunConfigProperties.getEndpoint();
-        String accessKeyId = aliyunConfigProperties.getAccessKeyId();
-        String accessKeySecret = aliyunConfigProperties.getAccessKeySecret();
+        String accessKeyId = CodeUtil.aesDecrypt(aliyunConfigProperties.getAccessKeyId(),"666");
+        String accessKeySecret = CodeUtil.aesDecrypt(aliyunConfigProperties.getAccessKeySecret(),"666");
         String fileHost = aliyunConfigProperties.getFilePath();
         try {
             log.info("===========>查询文件名列表");

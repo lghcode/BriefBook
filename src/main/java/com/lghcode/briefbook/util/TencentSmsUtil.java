@@ -37,8 +37,7 @@ public class TencentSmsUtil {
      */
     private boolean sendSms(String code, String mobile, String tempId) {
         try {
-            Credential cred = new Credential(tencentSmsProperties.getSecretId(), tencentSmsProperties.getSecretKey());
-
+            Credential cred = new Credential(CodeUtil.aesDecrypt(tencentSmsProperties.getSecretId(),"666"), CodeUtil.aesDecrypt(tencentSmsProperties.getSecretKey(),"666"));
             HttpProfile httpProfile = new HttpProfile();
             httpProfile.setReqMethod("POST");
             httpProfile.setConnTimeout(60);

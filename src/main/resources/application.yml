@@ -24,8 +24,8 @@ mybatis-plus:
 #oss
 oss:
   endpoint: http://oss-cn-hangzhou.aliyuncs.com #节点域名
-  accessKeyId: LTAItTfvXFdSEtAT #AccessKey
-  accessKeySecret: ZFudNKdhnkJcaTYq1QjuYPQ0e4HZZD  #Accesssecret
+  accessKeyId: OlRMCbIhI4P/M1Qx7nQKMQQpryRuYzWxSUbJR07W6W0= #加密后的AccessKey
+  accessKeySecret: U/nZyKhCqF44ms6ZgClRFS5igSvWIPYx6+uvUtnQTvQ=  #加密后的Accesssecret
   bucketName: lgh-chat-im # bucket名称
   filePath: briefBook    #bucket下文件夹的路径
   domain: lgh-chat-im.oss-cn-hangzhou.aliyuncs.com #文件访问域名前缀
@@ -33,8 +33,8 @@ oss:
 #tencent sms
 tencent:
   sms:
-    secretId: AKIDPeiX6QuzJNBlD67Xw97csu7VeYMxDchW #腾讯云账户密钥对id
-    secretKey: tZ07cqoW31lETUt2vRinb9a2E91iHagR #腾讯云账户密钥对key
+    secretId: UeyTK2NW56uclvogVszKzUTowJDWIUah02iKP3nvBejyqI/xZX1VTX5EJuLdP+fU #加密后的腾讯云账户密钥对id
+    secretKey: cp+s1QM3WXY3PNrVvJblTlOI/pDZDhn8D3O6KkP6ADsEKa8kbmM1sUlGyUdO1ult #加密后的腾讯云账户密钥对key
     sdkAppId: 1400411815  #应用appId
     sign: 亮桂港佳伟  #短信签名内容
     loginTemplateId: 686990  #登录短信模板id
