@@ -61,14 +61,11 @@ public class UserController {
             return ResultJson.error("没有找到该手机号的验证码记录");
         }
         //检验验证码是否过期
-        long sendCodeTime = smsCode.getCreateTime().getTime();
-        long nowTime = System.currentTimeMillis();
-        if ((nowTime - sendCodeTime)>(TencentSmsConstant.PERIOD_OF_VALIDITY)){
+        if (checkSmsCodeIsExpired(smsCode)){
             return ResultJson.error("验证码已过期，请重新发送");
         }
         //校验验证码是否输入正确
-        String realCode = smsCode.getCode();
-        if (!MD5Utils.getMD5Str(code).equals(realCode)) {
+        if (checkSmsCodeIsCorrect(smsCode,code)) {
             return ResultJson.error("验证码输入有误");
         }
         //判断该手机号是否注册过
@@ -205,14 +202,11 @@ public class UserController {
             return ResultJson.error("更新失败");
         }
         //检验验证码是否过期
-        long sendCodeTime = resultSmsCode.getCreateTime().getTime();
-        long nowTime = System.currentTimeMillis();
-        if ((nowTime - sendCodeTime)>(TencentSmsConstant.PERIOD_OF_VALIDITY)){
+        if (checkSmsCodeIsExpired(resultSmsCode)){
             return ResultJson.error("验证码已过期，请重新发送");
         }
         //校验验证码是否输入正确
-        String realCode = resultSmsCode.getCode();
-        if (!MD5Utils.getMD5Str(code).equals(realCode)) {
+        if (checkSmsCodeIsCorrect(resultSmsCode,code)) {
             return ResultJson.error("验证码输入有误");
         }
         //验证码正确，修改密码
@@ -306,14 +300,11 @@ public class UserController {
             return ResultJson.error("更新失败,请获取验证码");
         }
         //检验验证码是否过期
-        long sendCodeTime = resultSmsCode.getCreateTime().getTime();
-        long nowTime = System.currentTimeMillis();
-        if ((nowTime - sendCodeTime)>(TencentSmsConstant.PERIOD_OF_VALIDITY)){
+        if (checkSmsCodeIsExpired(resultSmsCode)){
             return ResultJson.error("验证码已过期，请重新发送");
         }
         //校验验证码是否输入正确
-        String realCode = resultSmsCode.getCode();
-        if (!MD5Utils.getMD5Str(code).equals(realCode)) {
+        if (checkSmsCodeIsCorrect(resultSmsCode,code)) {
             return ResultJson.error("验证码输入有误");
         }
         //判断要更换的手机号是否已经被人注册
@@ -328,6 +319,33 @@ public class UserController {
             return ResultJson.error("手机号更新失败");
         }
         return ResultJson.success("手机号已经更换成功");
+    }
 
+    /**
+     * 检验验证码是否过期
+     *
+     * @Author lghcode
+     * @param  smsCode 短信验证码记录
+     * @Date 2020/8/13 11:33
+     */
+    private boolean checkSmsCodeIsExpired(SmsCode smsCode){
+        //检验验证码是否过期
+        long sendCodeTime = smsCode.getCreateTime().getTime();
+        long nowTime = System.currentTimeMillis();
+        return (nowTime - sendCodeTime) > (TencentSmsConstant.PERIOD_OF_VALIDITY);
+    }
+
+
+    /**
+     * 检验验证码是否输入正确
+     *
+     * @Author lghcode
+     * @param  smsCode 短信验证码记录
+     * @param  inputCode 用户输入的验证码
+     * @Date 2020/8/13 11:33
+     */
+    private boolean checkSmsCodeIsCorrect(SmsCode smsCode,String inputCode){
+        String realCode = smsCode.getCode();
+        return !MD5Utils.getMD5Str(inputCode).equals(realCode);
     }
 }
