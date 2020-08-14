@@ -9,9 +9,13 @@ import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
+import com.lghcode.briefbook.model.vo.LoginUserInfo;
 import com.lghcode.briefbook.service.SmsCodeService;
 import com.lghcode.briefbook.service.UserService;
-import com.lghcode.briefbook.util.*;
+import com.lghcode.briefbook.util.CommonUtil;
+import com.lghcode.briefbook.util.MD5Utils;
+import com.lghcode.briefbook.util.ResultJson;
+import com.lghcode.briefbook.util.TencentSmsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,8 +83,8 @@ public class UserController {
         if (currentUser == null) {
             return ResultJson.error("该账号已被注销");
         }
-        currentUser.setPassword(null);
-        return ResultJson.success("登录成功",currentUser);
+        LoginUserInfo loginUserInfo = userService.getLoginUser(currentUser);
+        return ResultJson.success("登录成功",loginUserInfo);
     }
 
     /**
@@ -114,8 +118,8 @@ public class UserController {
             return ResultJson.error("密码输入错误");
         }
         //登录成功
-        currUser.setPassword(null);
-        return ResultJson.success("登录成功",currUser);
+        LoginUserInfo loginUserInfo = userService.getLoginUser(currUser);
+        return ResultJson.success("登录成功",loginUserInfo);
     }
 
     /**

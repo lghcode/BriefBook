@@ -2,6 +2,7 @@ package com.lghcode.briefbook.service;
 
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
+import com.lghcode.briefbook.model.vo.LoginUserInfo;
 
 /**
  * @Author lgh
@@ -111,4 +112,14 @@ public interface UserService {
      * @Date 2020/8/13 0:13
      */
     void saveNewMobile(Long id, String newMobile);
+
+    /**
+     * 获取登录用户基本信息
+     *
+     * @Author laiyou
+     * @param  currUser 登录用户实体类
+     * @return LoginUserInfo
+     * @Date 2020/8/14 17:13
+     */
+    LoginUserInfo getLoginUser(User currUser);
 }

@@ -7,7 +7,13 @@ import com.lghcode.briefbook.enums.EditProfileEnum;
 import com.lghcode.briefbook.mapper.UserMapper;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
+import com.lghcode.briefbook.model.vo.LoginUser;
+import com.lghcode.briefbook.model.vo.LoginUserInfo;
+import com.lghcode.briefbook.model.vo.UserCount;
+import com.lghcode.briefbook.service.UserArticleService;
+import com.lghcode.briefbook.service.UserFansService;
 import com.lghcode.briefbook.service.UserService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +29,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private UserFansService userFansService;
+
+    @Autowired
+    private UserArticleService userArticleService;
     /**
      * 检验用户手机号是否存在
      *
@@ -200,5 +211,40 @@ public class UserServiceImpl implements UserService {
         user.setId(id);
         user.setMobile(newMobile);
         userMapper.updateById(user);
+    }
+
+    /**
+     * 获取登录用户基本信息
+     *
+     * @param currUser 登录用户实体类
+     * @return LoginUserInfo
+     * @Author laiyou
+     * @Date 2020/8/14 17:13
+     */
+    @Override
+    public LoginUserInfo getLoginUser(User currUser) {
+        LoginUser loginUser = new LoginUser();
+        //当前用户登录的数据
+        BeanUtils.copyProperties(currUser,loginUser);
+        UserCount userCount = new UserCount();
+        //获取当前用户关注的数量
+        Integer attentionCount =  userFansService.getUserAttentionCount(currUser.getId());
+        userCount.setAttentionCount(attentionCount);
+        //获取当前用户的粉丝数量
+        Integer fansCount = userFansService.getUserFansCount(currUser.getId());
+        userCount.setFansCount(fansCount);
+        //获取当前用户发布的私密文章数量
+        Integer privateArticleCount = userArticleService.getUserPrivateArticleCount(currUser.getId());
+        userCount.setPrivateArticleCount(privateArticleCount);
+        //获取当前用户发布的公开文章的总字数
+        Integer wordCount = userArticleService.getUserWordCount(currUser.getId());
+        userCount.setWordCount(wordCount);
+        //获取当前用户收获文章赞的数量
+        Integer approvalCount = userArticleService.getUserApprovalCount(currUser.getId());
+        userCount.setApprovalCount(approvalCount);
+        LoginUserInfo loginUserInfo = new LoginUserInfo();
+        loginUserInfo.setLoginUser(loginUser);
+        loginUserInfo.setUserCount(userCount);
+        return loginUserInfo;
     }
 }
