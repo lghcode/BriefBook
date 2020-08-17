@@ -13,6 +13,8 @@ import com.lghcode.briefbook.util.ResultJson;
 import com.lghcode.briefbook.util.TencentSmsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +45,12 @@ public class DemoUserController {
 
     @Autowired
     private SmsCodeService smsCodeService;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate2;
 
 
     /**
@@ -110,6 +118,20 @@ public class DemoUserController {
     public ResultJson test(@NotEmpty(message = "用户id不能为空") @RequestParam("userId") String userId,
                            @NotEmpty(message = "用户手机号不能为空") @RequestParam("mobile") String mobile){
         return ResultJson.success("成功");
+    }
+
+    @RequestMapping("/setKey")
+    public ResultJson setKey(){
+        redisTemplate.opsForValue().set("tom","1");
+        redisTemplate2.opsForValue().set("Jim",2);
+        return ResultJson.success("设置成功");
+    }
+
+    @RequestMapping("/getKey")
+    public ResultJson getKey(){
+        String id = redisTemplate.opsForValue().get("tom");
+        Integer userId = (Integer) redisTemplate2.opsForValue().get("Jim");
+        return ResultJson.success("设置成功",id+" "+userId);
     }
 
 }

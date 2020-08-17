@@ -41,7 +41,7 @@ public class LoginUser {
     /**
      * 生日
      */
-    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+:08:00")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date birthday;
     /**
      * 个人主页
@@ -60,7 +60,9 @@ public class LoginUser {
      */
     private Integer isCreator;
 
-
-
+    /**
+     * 登录token
+     */
+    private String token;
 
 }

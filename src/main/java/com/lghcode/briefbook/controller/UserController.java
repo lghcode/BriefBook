@@ -13,10 +13,7 @@ import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.LoginUserInfo;
 import com.lghcode.briefbook.service.SmsCodeService;
 import com.lghcode.briefbook.service.UserService;
-import com.lghcode.briefbook.util.CommonUtil;
-import com.lghcode.briefbook.util.MD5Utils;
-import com.lghcode.briefbook.util.ResultJson;
-import com.lghcode.briefbook.util.TencentSmsUtil;
+import com.lghcode.briefbook.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -46,6 +44,9 @@ public class UserController {
 
     @Autowired
     private SmsCodeService smsCodeService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     /**
      * 用户登录(手机号验证码登录)
@@ -217,7 +218,11 @@ public class UserController {
      * @Date 2020/8/10 16:42
      */
     @PostMapping("/editProfile")
-    public ResultJson editProfile(@Validated EditProfileParam editProfileParam){
+    public ResultJson editProfile(@Validated EditProfileParam editProfileParam, HttpServletRequest request){
+        Long userId = jwtTokenUtil.getUserIdFromHeader(request);
+        if (!editProfileParam.getUserId().equals(userId)) {
+            throw new BizException("用户id不是当前登录用户");
+        }
         //校验性别参数格式
         if (editProfileParam.getEditType() == EditProfileEnum.EDIT_SEX.getCode()
             && !checkSexValueFormat(editProfileParam.getEditValue())) {

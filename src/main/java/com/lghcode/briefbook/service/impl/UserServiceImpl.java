@@ -3,6 +3,7 @@ package com.lghcode.briefbook.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lghcode.briefbook.constant.Constant;
 import com.lghcode.briefbook.enums.EditProfileEnum;
 import com.lghcode.briefbook.mapper.UserMapper;
 import com.lghcode.briefbook.model.User;
@@ -13,11 +14,14 @@ import com.lghcode.briefbook.model.vo.UserCount;
 import com.lghcode.briefbook.service.UserArticleService;
 import com.lghcode.briefbook.service.UserFansService;
 import com.lghcode.briefbook.service.UserService;
+import com.lghcode.briefbook.util.JwtTokenUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author lgh
@@ -34,6 +38,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserArticleService userArticleService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
     /**
      * 检验用户手机号是否存在
      *
@@ -224,6 +234,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public LoginUserInfo getLoginUser(User currUser) {
         LoginUser loginUser = new LoginUser();
+        //生成token，存入redis
+        String token = jwtTokenUtil.generateToken(currUser);
+        redisTemplate.opsForValue().set(Constant.REDIS_LOGIN_KEY+token,token,Constant.REDIS_LOGIN_EXPRIE, TimeUnit.DAYS);
+        loginUser.setToken(token);
         //当前用户登录的数据
         BeanUtils.copyProperties(currUser,loginUser);
         UserCount userCount = new UserCount();
