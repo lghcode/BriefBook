@@ -13,11 +13,14 @@ import com.lghcode.briefbook.util.ResultJson;
 import com.lghcode.briefbook.util.TencentSmsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 /**
@@ -26,6 +29,7 @@ import java.util.Date;
  */
 @RestController
 @RequestMapping("/oss")
+@Validated
 public class DemoUserController {
 
     @Autowired
@@ -99,6 +103,13 @@ public class DemoUserController {
         SmsCode smsCode = SmsCode.builder().mobile(mobile).code(code).type(SendSmsEnum.LOGIN_SMS.getCode()).createTime(new Date()).build();
         smsCodeService.save(smsCode);
         return ResultJson.success("验证码发送成功");
+    }
+
+
+    @RequestMapping("/test")
+    public ResultJson test(@NotEmpty(message = "用户id不能为空") @RequestParam("userId") String userId,
+                           @NotEmpty(message = "用户手机号不能为空") @RequestParam("mobile") String mobile){
+        return ResultJson.success("成功");
     }
 
 }
