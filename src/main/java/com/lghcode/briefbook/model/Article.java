@@ -2,11 +2,9 @@ package com.lghcode.briefbook.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -18,6 +16,7 @@ import java.util.Date;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Article {
     /**
      * 主键id
@@ -58,22 +57,22 @@ public class Article {
     /**
      * 简钻数量
      */
-    private Long diamondCount;
+    private BigDecimal diamondCount;
 
     /**
      * 0 - 打开评论 1-关闭评论
      */
-    private Long isOpenComment;
+    private Integer isOpenComment;
 
     /**
      * 0 - 公开 1 - 私密
      */
-    private Long  accessStatus;
+    private Integer  accessStatus;
 
     /**
      * 文章发布时间
      */
-    private Date publicTime;
+    private Date publishTime;
 
     /**
      * 文章更新时间

@@ -12,6 +12,15 @@ public enum  UserEnum implements BaseEnum{
     SEX_SECRET(0,"保密"),
     SEX_MALE(1,"男"),
     SEX_FEMALE(2,"女"),
+
+
+    /**
+     * 用户-文章关系枚举
+     */
+    USER_PUBLIASH_ARTICLE(0,"用户发布文章"),
+    USER_LIKE_ARTICLE(1,"用户点赞文章"),
+    USER_PRAISE_ARTICLE(2,"用户赞赏文章"),
+    USER_COLLECT_ARTICLE(3,"用户收藏文章")
     ;
 
 
