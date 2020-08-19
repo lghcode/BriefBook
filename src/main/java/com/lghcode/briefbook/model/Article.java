@@ -69,6 +69,12 @@ public class Article {
      */
     private Integer  accessStatus;
 
+
+    /**
+     * 0--正常，1--回收，2--删除
+     */
+    private Integer status;
+
     /**
      * 文章发布时间
      */

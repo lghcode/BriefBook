@@ -11,6 +11,7 @@
         on ua.article_id = a.id
         where ua.type = 0
         and a.access_status = 1
+        and a.status = 0
         and ua.user_id = #{userId}
     </select>
 
@@ -22,6 +23,7 @@
         on ua.article_id = a.id
         where ua.type = 0
         and a.access_status = 0
+        and a.status = 0
         and ua.user_id = #{userId}
     </select>
 
@@ -33,6 +35,7 @@
         on ua.article_id = a.id
         where ua.type = 0
         and a.access_status = 0
+        and a.status = 0
         and ua.user_id = #{userId}
     </select>
 </mapper>

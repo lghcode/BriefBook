@@ -3,4 +3,18 @@
 <mapper namespace="com.lghcode.briefbook.mapper.ArticleMapper" >
 
 
+    <select id="selectListPage" resultType="com.lghcode.briefbook.model.Article">
+        select
+        *
+        from article
+        where status = 0
+    </select>
+
+    <select id="selectListPageWithKey" resultType="com.lghcode.briefbook.model.Article">
+        select
+        *
+        from article
+        where status = 0
+        and (title like CONCAT('%',#{keyWord},'%') or cont like CONCAT('%',#{keyWord},'%'))
+    </select>
 </mapper>
