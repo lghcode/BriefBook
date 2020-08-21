@@ -332,4 +332,20 @@ public class UserController {
         String realCode = smsCode.getCode();
         return !MD5Utils.getMD5Str(inputCode).equals(realCode);
     }
+
+    /**
+     * 关注/取消关注
+     *
+     * @Author lghcode
+     * @param  followUserId 对方用户id
+     * @return type  0-关注，1-取消关注
+     * @Date 2020/8/21 17:41
+     */
+    @PostMapping("/followUser")
+    public ResultJson followUser(@NotNull(message = "用户id不能为空") @RequestParam("followUserId") Long followUserId,
+                                 @NotNull(message = "类型不能为空") @RequestParam("type") Integer type,HttpServletRequest request){
+        Long userId = jwtTokenUtil.getUserIdFromHeader(request);
+        userService.followUser(followUserId,type,userId);
+        return ResultJson.success("操作成功");
+    }
 }

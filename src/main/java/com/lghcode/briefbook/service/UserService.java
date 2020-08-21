@@ -122,4 +122,15 @@ public interface UserService {
      * @Date 2020/8/14 17:13
      */
     LoginUserInfo getLoginUser(User currUser);
+
+    /**
+     * 关注/取消关注
+     *
+     * @Author lghcode
+     * @param  followUserId 要关注人的id
+     * @param  type 0--关注  1--取消关注
+     * @param  userId 当前登录用户id
+     * @Date 2020/8/21 17:52
+     */
+    void followUser(Long followUserId, Integer type,Long userId);
 }

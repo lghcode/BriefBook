@@ -5,8 +5,12 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lghcode.briefbook.constant.Constant;
 import com.lghcode.briefbook.enums.EditProfileEnum;
+import com.lghcode.briefbook.enums.UserEnum;
+import com.lghcode.briefbook.exception.BizException;
+import com.lghcode.briefbook.mapper.UserFansMapper;
 import com.lghcode.briefbook.mapper.UserMapper;
 import com.lghcode.briefbook.model.User;
+import com.lghcode.briefbook.model.UserFans;
 import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.LoginUser;
 import com.lghcode.briefbook.model.vo.LoginUserInfo;
@@ -32,6 +36,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private UserFansMapper userFansMapper;
 
     @Autowired
     private UserFansService userFansService;
@@ -260,5 +267,31 @@ public class UserServiceImpl implements UserService {
         loginUserInfo.setLoginUser(loginUser);
         loginUserInfo.setUserCount(userCount);
         return loginUserInfo;
+    }
+
+    /**
+     * 关注/取消关注
+     *
+     * @param followUserId 要关注人的id
+     * @param type         0--关注  1--取消关注
+     * @Author lghcode
+     * @Date 2020/8/21 17:52
+     */
+    @Override
+    public void followUser(Long followUserId, Integer type,Long userId) {
+        //关注
+        if (type == UserEnum.FOLLOW.getCode()){
+            Integer count = userFansMapper.selectCount(new QueryWrapper<UserFans>().lambda().eq(UserFans::getUserId,followUserId)
+                                    .eq(UserFans::getFansId,userId));
+            if (count > 0){
+                throw new BizException("对该用户已经关注过");
+            }
+            UserFans userFans = UserFans.builder().userId(followUserId).fansId(userId).createTime(new Date()).build();
+            userFansMapper.insert(userFans);
+        }else if (type == UserEnum.CANNEL_FOLLOW.getCode()){
+            //取消关注
+            userFansMapper.delete(new QueryWrapper<UserFans>().lambda().eq(UserFans::getUserId,followUserId)
+                                .eq(UserFans::getFansId,userId));
+        }
     }
 }

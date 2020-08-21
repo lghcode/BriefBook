@@ -20,7 +20,13 @@ public enum  UserEnum implements BaseEnum{
     USER_PUBLIASH_ARTICLE(0,"用户发布文章"),
     USER_LIKE_ARTICLE(1,"用户点赞文章"),
     USER_PRAISE_ARTICLE(2,"用户赞赏文章"),
-    USER_COLLECT_ARTICLE(3,"用户收藏文章")
+    USER_COLLECT_ARTICLE(3,"用户收藏文章"),
+
+    /**
+     * 关注或者取消关注
+     */
+    FOLLOW(0,"关注"),
+    CANNEL_FOLLOW(1,"取消关注")
     ;
 
 
