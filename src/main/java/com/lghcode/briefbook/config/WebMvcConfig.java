@@ -33,7 +33,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.excludePathPatterns("/oss/**")
 				.excludePathPatterns("/user/loginSms")
 				.excludePathPatterns("/user/loginPw")
-				.excludePathPatterns("/user/sendSms");
+				.excludePathPatterns("/user/sendSms")
+				.excludePathPatterns("/article/getArticleById")
+				.excludePathPatterns("/article/recommendArticle")
+		;
 	}
 
     /**

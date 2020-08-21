@@ -1,21 +1,21 @@
 package com.lghcode.briefbook.controller;
 
+import com.lghcode.briefbook.constant.Constant;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
+import com.lghcode.briefbook.model.vo.ArticleDetailVo;
 import com.lghcode.briefbook.service.ArticleService;
 import com.lghcode.briefbook.util.JwtTokenUtil;
 import com.lghcode.briefbook.util.PageResponse;
 import com.lghcode.briefbook.util.ResultJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 
 /**
  * 文章模块控制层
@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 @RequestMapping("/article")
+@Validated
 public class ArticleController {
 
     @Autowired
@@ -64,5 +65,19 @@ public class ArticleController {
         return ResultJson.success("查询成功",articleIPage);
     }
 
-
+    /**
+     * 根据文章id获取文章相关信息
+     *
+     * @Author lghcode
+     * @param  articleId 文章id不能为空
+     * @return ResultJson
+     * @Date 2020/8/19 21:37
+     */
+    @GetMapping("/getArticleById")
+    public ResultJson getArticleById(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId,
+                                     HttpServletRequest request){
+        String authToken = request.getHeader(Constant.TOKEN_NAME);
+        ArticleDetailVo articleDetailVo = articleService.getArticleById(authToken,articleId);
+        return ResultJson.success("获取成功",articleDetailVo);
+    }
 }

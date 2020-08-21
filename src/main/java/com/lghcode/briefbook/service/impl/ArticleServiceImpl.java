@@ -1,21 +1,27 @@
 package com.lghcode.briefbook.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lghcode.briefbook.constant.Constant;
 import com.lghcode.briefbook.enums.UserEnum;
-import com.lghcode.briefbook.mapper.ArticleMapper;
-import com.lghcode.briefbook.mapper.UserArticleMapper;
-import com.lghcode.briefbook.model.Article;
-import com.lghcode.briefbook.model.UserArticle;
+import com.lghcode.briefbook.exception.BizException;
+import com.lghcode.briefbook.mapper.*;
+import com.lghcode.briefbook.model.*;
 import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
+import com.lghcode.briefbook.model.vo.*;
 import com.lghcode.briefbook.service.ArticleService;
+import com.lghcode.briefbook.util.JwtTokenUtil;
 import com.lghcode.briefbook.util.PageResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Author lgh
@@ -29,6 +35,21 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private UserArticleMapper userArticleMapper;
+
+    @Autowired
+    private CorpusMapper corpusMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UserFansMapper userFansMapper;
+
+    @Autowired
+    private CommentMapper commentMapper;
 
     /**
      * 发布文章
@@ -87,5 +108,83 @@ public class ArticleServiceImpl implements ArticleService {
                 .totalRecord(articles.getTotal())
                 .rows(articles.getRecords())
                 .build();
+    }
+
+    /**
+     * 根据文章id获取文章相关信息
+     *
+     * @param authToken 用户token
+     * @param articleId 文章id不能为空
+     * @return ArticleDetailVo
+     * @Author lghcode
+     * @Date 2020/8/19 21:37
+     */
+    @Override
+    public ArticleDetailVo getArticleById(String authToken, Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new BizException("该文章不存在");
+        }
+        ArticleDetailVo articleDetailVo = new ArticleDetailVo();
+        BeanUtils.copyProperties(article,articleDetailVo);
+        articleDetailVo.setArticleId(article.getId());
+        //增加该文章的阅读量
+        article.setReadCount(article.getReadCount()+1);
+        articleMapper.updateById(article);
+        //得到文集名称
+        Corpus corpus = corpusMapper.selectById(article.getCorpusId());
+        articleDetailVo.setCorpusName(corpus.getName());
+        //根据文章id，查询该文章的发布作者
+        UserBaseVo userBaseVo = userArticleMapper.getUserByArticleId(articleId);
+        if (userBaseVo == null) {
+            throw new BizException("业务数据异常，文章的发布作者数据丢失");
+        }
+        articleDetailVo.setUserId(userBaseVo.getUserId());
+        articleDetailVo.setUserName(userBaseVo.getUserName());
+        articleDetailVo.setHeadImg(userBaseVo.getHeadImg());
+        //如果authToken不等于空并且没有过期
+        if (!StringUtils.isBlank(authToken) && redisTemplate.hasKey(Constant.REDIS_LOGIN_KEY+authToken)){
+            //判断当前登录用户有没有给该文章点赞
+            Long curLoginUserId = jwtTokenUtil.getUserIdFromToken(authToken);
+            Integer res = userArticleMapper.selectCount(new QueryWrapper<UserArticle>().lambda()
+                    .eq(UserArticle::getUserId,curLoginUserId)
+                    .eq(UserArticle::getArticleId,articleId)
+                    .eq(UserArticle::getType,UserEnum.USER_LIKE_ARTICLE.getCode()));
+            if (res > 0){
+                articleDetailVo.setLike(true);
+            }
+            //判断当前登录用户有没有给该文章收藏
+            Integer res2 = userArticleMapper.selectCount(new QueryWrapper<UserArticle>().lambda()
+                    .eq(UserArticle::getUserId,curLoginUserId)
+                    .eq(UserArticle::getArticleId,articleId)
+                    .eq(UserArticle::getType,UserEnum.USER_COLLECT_ARTICLE.getCode()));
+            if (res2 > 0){
+                articleDetailVo.setCollect(true);
+            }
+            //判断当前登录用户有没有对该文章作者关注
+            Integer m = userFansMapper.selectCount(new QueryWrapper<UserFans>().lambda()
+                                        .eq(UserFans::getUserId,userBaseVo.getUserId())
+                                        .eq(UserFans::getFansId,curLoginUserId));
+            if (m > 0){
+                articleDetailVo.setFollow(true);
+            }
+        }
+        //获取文章的赞赏用户列表数据
+        List<PraiseUserVo> praiseUserVos = userArticleMapper.getPraiseUserListByArticleId(articleId);
+        articleDetailVo.setPraiseUserVoList(praiseUserVos);
+        //获取文章的评论数量
+        Integer commentCount = commentMapper.selectCount(new QueryWrapper<Comment>().lambda()
+                                        .eq(Comment::getArticleId,articleId));
+        articleDetailVo.setCommentCount(commentCount);
+        //评论数据列表
+        List<CommentVo> commentVos = commentMapper.getParentComments(articleId);
+        if (commentVos.size() != 0){
+            for (CommentVo commentVo : commentVos){
+                List<ChildrenCommentVo> childrenCommentVos = commentMapper.getChildrenComments(commentVo.getCommentId());
+                commentVo.setChildrens(childrenCommentVos);
+            }
+        }
+        articleDetailVo.setCommentVoList(commentVos);
+        return articleDetailVo;
     }
 }

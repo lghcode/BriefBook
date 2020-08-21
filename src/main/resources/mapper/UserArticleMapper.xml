@@ -38,4 +38,29 @@
         and a.status = 0
         and ua.user_id = #{userId}
     </select>
+
+    <select id="getUserByArticleId" resultType="com.lghcode.briefbook.model.vo.UserBaseVo">
+        select
+            u.id as userId,
+            u.nick_name as userName,
+            u.head_img as headImg
+        from user_article ua
+        left join user u
+        on ua.user_id = u.id
+        where ua.type = 0
+        and ua.article_id = #{articleId}
+    </select>
+
+    <select id="getPraiseUserListByArticleId" resultType="com.lghcode.briefbook.model.vo.PraiseUserVo">
+        select
+           u.id as userId,
+           u.nick_name as userName,
+           u.head_img as headImg,
+           ua.create_time as praiseTime
+        from user_article ua
+        left join user u
+        on ua.user_id = u.id
+        where ua.type = 2
+        and ua.article_id = #{articleId}
+    </select>
 </mapper>

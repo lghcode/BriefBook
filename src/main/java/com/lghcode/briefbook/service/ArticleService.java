@@ -3,6 +3,7 @@ package com.lghcode.briefbook.service;
 import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
+import com.lghcode.briefbook.model.vo.ArticleDetailVo;
 import com.lghcode.briefbook.util.PageResponse;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,4 +32,15 @@ public interface ArticleService {
      * @Date 2020/8/19 15:02
      */
     PageResponse<Article> queryArticle(RecommendArticleParam articleParam);
+
+    /**
+     * 根据文章id获取文章相关信息
+     *
+     * @Author lghcode
+     * @param  authToken 用户token
+     * @param  articleId 文章id不能为空
+     * @return ResultJson
+     * @Date 2020/8/19 21:37
+     */
+    ArticleDetailVo getArticleById(String authToken, Long articleId);
 }
