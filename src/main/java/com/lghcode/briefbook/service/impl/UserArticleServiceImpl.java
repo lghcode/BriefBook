@@ -3,12 +3,15 @@ package com.lghcode.briefbook.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
+import com.lghcode.briefbook.mapper.ArticleMapper;
 import com.lghcode.briefbook.mapper.UserArticleMapper;
+import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.UserArticle;
 import com.lghcode.briefbook.service.UserArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -22,6 +25,8 @@ public class UserArticleServiceImpl implements UserArticleService {
     @Autowired
     private UserArticleMapper userArticleMapper;
 
+    @Autowired
+    private ArticleMapper articleMapper;
 
     /**
      * 获取当前用户发布的私密文章数量
@@ -87,12 +92,28 @@ public class UserArticleServiceImpl implements UserArticleService {
             UserArticle userArticle = UserArticle.builder().userId(userId).articleId(articleId)
                             .type(UserEnum.USER_LIKE_ARTICLE.getCode()).createTime(new Date()).build();
             userArticleMapper.insert(userArticle);
+            //每次点赞给文章增加0.002个简钻
+            Article article = articleMapper.selectById(articleId);
+            BigDecimal diamondCount = article.getDiamondCount();
+            diamondCount = diamondCount.add(new BigDecimal("0.002"));
+            article.setDiamondCount(diamondCount);
+            articleMapper.updateById(article);
         }else if(type == UserEnum.CANNEL_FOLLOW.getCode()) {
             //取消点赞
             userArticleMapper.delete(new QueryWrapper<UserArticle>().lambda()
                     .eq(UserArticle::getUserId,userId)
                     .eq(UserArticle::getArticleId,articleId)
                     .eq(UserArticle::getType,UserEnum.USER_LIKE_ARTICLE.getCode()));
+            //每次取消点赞给文章减少0.002个简钻
+            Article article = articleMapper.selectById(articleId);
+            BigDecimal diamondCount = article.getDiamondCount();
+            //判断文章简钻是否大于0
+            int res = diamondCount.compareTo(new BigDecimal("0"));
+            if (res > 0){
+                diamondCount = diamondCount.subtract(new BigDecimal("0.002"));
+                article.setDiamondCount(diamondCount);
+                articleMapper.updateById(article);
+            }
         }
     }
 

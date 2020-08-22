@@ -1,9 +1,12 @@
 package com.lghcode.briefbook.service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @Author:LaLion
  * @Date:2020/8/1320:29
  */
+@Transactional(rollbackFor = Exception.class)
 public interface UserArticleService {
 
 
