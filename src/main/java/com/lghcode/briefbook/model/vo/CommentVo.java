@@ -15,6 +15,8 @@ public class CommentVo {
 
     private Long commentId;
 
+    private boolean isLike;
+
     private Long userId;
 
     private String userName;

@@ -51,6 +51,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private CommentMapper commentMapper;
 
+    @Autowired
+    private UserLikeCommentMapper userLikeCommentMapper;
+
     /**
      * 发布文章
      *
@@ -142,6 +145,21 @@ public class ArticleServiceImpl implements ArticleService {
         articleDetailVo.setUserId(userBaseVo.getUserId());
         articleDetailVo.setUserName(userBaseVo.getUserName());
         articleDetailVo.setHeadImg(userBaseVo.getHeadImg());
+        //获取文章的赞赏用户列表数据
+        List<PraiseUserVo> praiseUserVos = userArticleMapper.getPraiseUserListByArticleId(articleId);
+        articleDetailVo.setPraiseUserVoList(praiseUserVos);
+        //获取文章的评论数量
+        Integer commentCount = commentMapper.selectCount(new QueryWrapper<Comment>().lambda()
+                .eq(Comment::getArticleId,articleId));
+        articleDetailVo.setCommentCount(commentCount);
+        //评论数据列表
+        List<CommentVo> commentVos = commentMapper.getParentComments(articleId);
+        if (commentVos.size() != 0){
+            for (CommentVo commentVo : commentVos){
+                List<ChildrenCommentVo> childrenCommentVos = commentMapper.getChildrenComments(commentVo.getCommentId());
+                commentVo.setChildrens(childrenCommentVos);
+            }
+        }
         //如果authToken不等于空并且没有过期
         if (!StringUtils.isBlank(authToken) && redisTemplate.hasKey(Constant.REDIS_LOGIN_KEY+authToken)){
             //判断当前登录用户有没有给该文章点赞
@@ -168,20 +186,15 @@ public class ArticleServiceImpl implements ArticleService {
             if (m > 0){
                 articleDetailVo.setFollow(true);
             }
-        }
-        //获取文章的赞赏用户列表数据
-        List<PraiseUserVo> praiseUserVos = userArticleMapper.getPraiseUserListByArticleId(articleId);
-        articleDetailVo.setPraiseUserVoList(praiseUserVos);
-        //获取文章的评论数量
-        Integer commentCount = commentMapper.selectCount(new QueryWrapper<Comment>().lambda()
-                                        .eq(Comment::getArticleId,articleId));
-        articleDetailVo.setCommentCount(commentCount);
-        //评论数据列表
-        List<CommentVo> commentVos = commentMapper.getParentComments(articleId);
-        if (commentVos.size() != 0){
+            //判断当前登录用户有没有对评论点过赞
             for (CommentVo commentVo : commentVos){
-                List<ChildrenCommentVo> childrenCommentVos = commentMapper.getChildrenComments(commentVo.getCommentId());
-                commentVo.setChildrens(childrenCommentVos);
+                Integer count = userLikeCommentMapper.selectCount(new QueryWrapper<UserLikeComment>().lambda()
+                                        .eq(UserLikeComment::getUserId,curLoginUserId)
+                                        .eq(UserLikeComment::getCommentId,commentVo.getCommentId())
+                );
+                if (count > 0){
+                    commentVo.setLike(true);
+                }
             }
         }
         articleDetailVo.setCommentVoList(commentVos);

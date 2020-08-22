@@ -1,5 +1,7 @@
 package com.lghcode.briefbook.controller;
 
+import com.lghcode.briefbook.exception.BizException;
+import com.lghcode.briefbook.exception.ErrorCodeEnum;
 import com.lghcode.briefbook.model.param.CommentPublishParam;
 import com.lghcode.briefbook.service.CommentService;
 import com.lghcode.briefbook.util.JwtTokenUtil;
@@ -39,5 +41,23 @@ public class CommentController {
         Long loginId = jwtTokenUtil.getUserIdFromHeader(request);
         commentService.publishComment(publishParam,loginId);
         return ResultJson.success("发表或回复评论成功");
+    }
+
+    /**
+     * 点赞或取消点赞 评论
+     *
+     * @Author lghcode
+     * @param commentId 评论id
+     * @return ResultJson
+     * @Date 2020/8/22 23:30
+     */
+    @PostMapping("/like")
+    public ResultJson like(Long commentId,Integer type,HttpServletRequest request){
+        if (commentId == null || type == null){
+            throw new BizException(ErrorCodeEnum.DATA_NULL);
+        }
+        Long userId = jwtTokenUtil.getUserIdFromHeader(request);
+        commentService.likeComment(commentId,type,userId);
+        return ResultJson.success("操作成功");
     }
 }
