@@ -7,6 +7,7 @@ import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
 import com.lghcode.briefbook.model.vo.ArticleDetailVo;
 import com.lghcode.briefbook.service.ArticleService;
+import com.lghcode.briefbook.service.UserArticleService;
 import com.lghcode.briefbook.util.JwtTokenUtil;
 import com.lghcode.briefbook.util.PageResponse;
 import com.lghcode.briefbook.util.ResultJson;
@@ -32,6 +33,9 @@ public class ArticleController {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UserArticleService userArticleService;
 
     /**
      * 发布文章
@@ -79,5 +83,23 @@ public class ArticleController {
         String authToken = request.getHeader(Constant.TOKEN_NAME);
         ArticleDetailVo articleDetailVo = articleService.getArticleById(authToken,articleId);
         return ResultJson.success("获取成功",articleDetailVo);
+    }
+
+    /**
+     * 点赞/取消点赞  文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @param type 0-点赞，1-取消点赞
+     * @return ResultJson
+     * @Date 2020/8/22 11:00
+     */
+    @PostMapping("/like")
+    public ResultJson like(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId,
+                           @NotNull(message = "点赞类型不能为空") @RequestParam("type") Integer type,
+                           HttpServletRequest request){
+        Long userId = jwtTokenUtil.getUserIdFromHeader(request);
+        userArticleService.userLikeArticle(userId,articleId,type);
+        return ResultJson.success("操作成功");
     }
 }

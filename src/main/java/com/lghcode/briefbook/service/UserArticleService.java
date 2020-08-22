@@ -36,4 +36,15 @@ public interface UserArticleService {
      * @Date 2020/8/14 17:02
      */
     Integer getUserApprovalCount(Long userId);
+
+    /**
+     * 点赞/取消点赞  文章
+     *
+     * @Author lghcode
+     * @param userId 当前登录用户id
+     * @param articleId 文章id
+     * @param type 0-点赞，1-取消点赞
+     * @Date 2020/8/22 11:00
+     */
+    void userLikeArticle(Long userId, Long articleId, Integer type);
 }
