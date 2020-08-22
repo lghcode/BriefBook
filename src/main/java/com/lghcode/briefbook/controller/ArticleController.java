@@ -102,4 +102,22 @@ public class ArticleController {
         userArticleService.userLikeArticle(userId,articleId,type);
         return ResultJson.success("操作成功");
     }
+
+    /**
+     * 收藏/取消收藏  文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @param type 0-收藏，1-取消收藏
+     * @return ResultJson
+     * @Date 2020/8/22 11:00
+     */
+    @PostMapping("/collect")
+    public ResultJson collect(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId,
+                           @NotNull(message = "收藏类型不能为空") @RequestParam("type") Integer type,
+                           HttpServletRequest request){
+        Long userId = jwtTokenUtil.getUserIdFromHeader(request);
+        userArticleService.userCollectArticle(userId,articleId,type);
+        return ResultJson.success("操作成功");
+    }
 }

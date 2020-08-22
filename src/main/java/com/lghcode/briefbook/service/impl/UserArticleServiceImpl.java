@@ -95,4 +95,38 @@ public class UserArticleServiceImpl implements UserArticleService {
                     .eq(UserArticle::getType,UserEnum.USER_LIKE_ARTICLE.getCode()));
         }
     }
+
+    /**
+     * 收藏/取消收藏  文章
+     *
+     * @param userId    当前登录用户id
+     * @param articleId 文章id
+     * @param type      0-收藏，1-取消收藏
+     * @Author lghcode
+     * @Date 2020/8/22 11:00
+     */
+    @Override
+    public void userCollectArticle(Long userId, Long articleId, Integer type) {
+        //收藏文章
+        if (type == UserEnum.FOLLOW.getCode()) {
+            //判断有没有收藏过
+            Integer count = userArticleMapper.selectCount(new QueryWrapper<UserArticle>().lambda()
+                    .eq(UserArticle::getUserId,userId)
+                    .eq(UserArticle::getArticleId,articleId)
+                    .eq(UserArticle::getType,UserEnum.USER_COLLECT_ARTICLE.getCode()));
+            if (count > 0) {
+                throw new BizException("对该文章已经收藏过");
+            }
+            //收藏操作
+            UserArticle userArticle = UserArticle.builder().userId(userId).articleId(articleId)
+                    .type(UserEnum.USER_COLLECT_ARTICLE.getCode()).createTime(new Date()).build();
+            userArticleMapper.insert(userArticle);
+        }else if(type == UserEnum.CANNEL_FOLLOW.getCode()) {
+            //取消收藏
+            userArticleMapper.delete(new QueryWrapper<UserArticle>().lambda()
+                    .eq(UserArticle::getUserId,userId)
+                    .eq(UserArticle::getArticleId,articleId)
+                    .eq(UserArticle::getType,UserEnum.USER_COLLECT_ARTICLE.getCode()));
+        }
+    }
 }
