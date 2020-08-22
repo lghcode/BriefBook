@@ -122,7 +122,6 @@ public class UserArticleServiceImpl implements UserArticleService {
      *
      * @param userId    当前登录用户id
      * @param articleId 文章id
-     * @param type      0-收藏，1-取消收藏
      * @Author lghcode
      * @Date 2020/8/22 11:00
      */
@@ -149,5 +148,36 @@ public class UserArticleServiceImpl implements UserArticleService {
                     .eq(UserArticle::getArticleId,articleId)
                     .eq(UserArticle::getType,UserEnum.USER_COLLECT_ARTICLE.getCode()));
         }
+    }
+
+    /**
+     * 赞赏/取消赞赏  文章
+     *
+     * @param userId    当前登录用户id
+     * @param diamond   简钻数量
+     * @param articleId 文章id
+     * @Author lghcode
+     * @Date 2020/8/22 11:00
+     */
+    @Override
+    public void userPraiseArticle(Long userId, String diamond, Long articleId) {
+        //判断有没有赞赏过
+        Integer count = userArticleMapper.selectCount(new QueryWrapper<UserArticle>().lambda()
+                .eq(UserArticle::getUserId,userId)
+                .eq(UserArticle::getArticleId,articleId)
+                .eq(UserArticle::getType,UserEnum.USER_PRAISE_ARTICLE.getCode()));
+        if (count > 0) {
+            throw new BizException("对该文章已经赞赏过");
+        }
+        //赞赏操作
+        UserArticle userArticle = UserArticle.builder().userId(userId).articleId(articleId)
+                .type(UserEnum.USER_PRAISE_ARTICLE.getCode()).createTime(new Date()).build();
+        userArticleMapper.insert(userArticle);
+        //增加文章的简钻
+        Article article = articleMapper.selectById(articleId);
+        BigDecimal diamondCount = article.getDiamondCount();
+        diamondCount = diamondCount.add(new BigDecimal(diamond));
+        article.setDiamondCount(diamondCount);
+        articleMapper.updateById(article);
     }
 }

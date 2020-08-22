@@ -61,4 +61,15 @@ public interface UserArticleService {
      * @Date 2020/8/22 11:00
      */
     void userCollectArticle(Long userId, Long articleId, Integer type);
+
+    /**
+     * 赞赏/取消赞赏  文章
+     *
+     * @Author lghcode
+     * @param userId 当前登录用户id
+     * @param diamond 简钻数量
+     * @param articleId 文章id
+     * @Date 2020/8/22 11:00
+     */
+    void userPraiseArticle(Long userId, String diamond, Long articleId);
 }

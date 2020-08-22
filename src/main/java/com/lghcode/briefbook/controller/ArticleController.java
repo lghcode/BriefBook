@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -118,6 +119,23 @@ public class ArticleController {
                            HttpServletRequest request){
         Long userId = jwtTokenUtil.getUserIdFromHeader(request);
         userArticleService.userCollectArticle(userId,articleId,type);
+        return ResultJson.success("操作成功");
+    }
+
+    /**
+     * 赞赏/取消赞赏  文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @return ResultJson
+     * @Date 2020/8/22 11:00
+     */
+    @PostMapping("/praise")
+    public ResultJson praise(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId,
+                              @NotEmpty(message = "简钻不能为空") @RequestParam("diamond") String diamond,
+                              HttpServletRequest request){
+        Long userId = jwtTokenUtil.getUserIdFromHeader(request);
+        userArticleService.userPraiseArticle(userId,diamond,articleId);
         return ResultJson.success("操作成功");
     }
 }
