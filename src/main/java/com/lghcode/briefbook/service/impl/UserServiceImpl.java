@@ -4,14 +4,19 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lghcode.briefbook.constant.Constant;
+import com.lghcode.briefbook.enums.ArticleEnum;
 import com.lghcode.briefbook.enums.EditProfileEnum;
 import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.exception.ErrorCodeEnum;
+import com.lghcode.briefbook.mapper.ArticleMapper;
+import com.lghcode.briefbook.mapper.UserArticleMapper;
 import com.lghcode.briefbook.mapper.UserFansMapper;
 import com.lghcode.briefbook.mapper.UserMapper;
+import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.User;
+import com.lghcode.briefbook.model.UserArticle;
 import com.lghcode.briefbook.model.UserFans;
 import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.*;
@@ -23,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +66,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
+
+    @Autowired
+    private UserArticleMapper userArticleMapper;
+
+    @Autowired
+    private ArticleMapper articleMapper;
     /**
      * 检验用户手机号是否存在
      *
@@ -371,5 +383,34 @@ public class UserServiceImpl implements UserService {
         List<UserActionVo> userActionVoList = userActionService.getUserActions(userId);
         userIndexVo.setUserActionVos(userActionVoList);
         return userIndexVo;
+    }
+
+    /**
+     * 清算每个用户的简钻余额
+     *
+     * @Author lghcode
+     * @Date 2020/8/23 22:13
+     */
+    @Override
+    public void settleDiamondTask() {
+        List<User> userList = userMapper.selectList(null);
+        for (User user : userList){
+            List<UserArticle> userArticles = userArticleMapper.selectList(new QueryWrapper<UserArticle>().lambda()
+                    .eq(UserArticle::getUserId,user.getId())
+                    .eq(UserArticle::getType, UserEnum.USER_PUBLIASH_ARTICLE.getCode()));
+            BigDecimal totalDiamondCount = user.getDiamondTotal();
+            for (UserArticle userArticle : userArticles){
+                Article article = articleMapper.selectOne(new QueryWrapper<Article>().lambda().eq(Article::getId,userArticle.getArticleId())
+                        .eq(Article::getIsSettle, ArticleEnum.NOT_SETTLE.getCode()));
+                if (article != null) {
+                    BigDecimal diamondCount = article.getDiamondCount();
+                    totalDiamondCount = totalDiamondCount.add(diamondCount);
+                    article.setIsSettle(ArticleEnum.ALREADY_SETTLE.getCode());
+                    articleMapper.updateById(article);
+                }
+            }
+            user.setDiamondTotal(totalDiamondCount);
+            userMapper.updateById(user);
+        }
     }
 }

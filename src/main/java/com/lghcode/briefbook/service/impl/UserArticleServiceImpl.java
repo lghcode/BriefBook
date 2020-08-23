@@ -1,12 +1,15 @@
 package com.lghcode.briefbook.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lghcode.briefbook.enums.ArticleEnum;
 import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.mapper.ArticleMapper;
 import com.lghcode.briefbook.mapper.UserArticleMapper;
+import com.lghcode.briefbook.mapper.UserMapper;
 import com.lghcode.briefbook.model.Article;
+import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.UserArticle;
 import com.lghcode.briefbook.model.vo.ArticleVo;
 import com.lghcode.briefbook.service.UserActionService;
@@ -34,6 +37,9 @@ public class UserArticleServiceImpl implements UserArticleService {
 
     @Autowired
     private ArticleMapper articleMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 获取当前用户发布的私密文章数量
@@ -104,6 +110,7 @@ public class UserArticleServiceImpl implements UserArticleService {
             BigDecimal diamondCount = article.getDiamondCount();
             diamondCount = diamondCount.add(new BigDecimal("0.002"));
             article.setDiamondCount(diamondCount);
+            article.setIsSettle(ArticleEnum.NOT_SETTLE.getCode());
             articleMapper.updateById(article);
             //同步到用户动态表
             userActionService.newAction(userId,UserActionEnum.LIKE.getCode(),articleId,UserActionEnum.ARTICLE.getCode());
@@ -121,6 +128,7 @@ public class UserArticleServiceImpl implements UserArticleService {
             if (res > 0){
                 diamondCount = diamondCount.subtract(new BigDecimal("0.002"));
                 article.setDiamondCount(diamondCount);
+                article.setIsSettle(ArticleEnum.NOT_SETTLE.getCode());
                 articleMapper.updateById(article);
             }
             //同步到用户动态表
@@ -176,6 +184,11 @@ public class UserArticleServiceImpl implements UserArticleService {
      */
     @Override
     public void userPraiseArticle(Long userId, String diamond, Long articleId) {
+        User user = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId,userId));
+        int res = user.getDiamondTotal().compareTo(new BigDecimal(diamond));
+        if (res < 0){
+            throw new BizException("用户简钻余额不足");
+        }
         //判断有没有赞赏过
         Integer count = userArticleMapper.selectCount(new QueryWrapper<UserArticle>().lambda()
                 .eq(UserArticle::getUserId,userId)
@@ -193,7 +206,11 @@ public class UserArticleServiceImpl implements UserArticleService {
         BigDecimal diamondCount = article.getDiamondCount();
         diamondCount = diamondCount.add(new BigDecimal(diamond));
         article.setDiamondCount(diamondCount);
+        article.setIsSettle(ArticleEnum.NOT_SETTLE.getCode());
         articleMapper.updateById(article);
+        //减少当前登录用户的简钻余额
+        user.setDiamondTotal(user.getDiamondTotal().subtract(new BigDecimal(diamond)));
+        userMapper.updateById(user);
         //同步到用户动态表
         userActionService.newAction(userId,UserActionEnum.PRAISE.getCode(),articleId,UserActionEnum.ARTICLE.getCode());
     }

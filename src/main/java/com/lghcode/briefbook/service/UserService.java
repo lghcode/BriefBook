@@ -147,4 +147,12 @@ public interface UserService {
      * @Date 2020/8/23 11:15
      */
     UserIndexVo getUserIndex(String authToken, Long userId);
+
+    /**
+     * 清算每个用户的简钻余额
+     *
+     * @Author lghcode
+     * @Date 2020/8/23 22:13
+     */
+    void settleDiamondTask();
 }

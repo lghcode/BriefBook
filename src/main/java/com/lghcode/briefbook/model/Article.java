@@ -76,6 +76,11 @@ public class Article {
     private Integer status;
 
     /**
+     * 0--未清算，1--已清算
+     */
+    private Integer isSettle;
+
+    /**
      * 文章发布时间
      */
     private Date publishTime;
