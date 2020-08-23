@@ -2,6 +2,7 @@ package com.lghcode.briefbook.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lghcode.briefbook.model.UserArticle;
+import com.lghcode.briefbook.model.vo.ArticleVo;
 import com.lghcode.briefbook.model.vo.PraiseUserVo;
 import com.lghcode.briefbook.model.vo.UserBaseVo;
 
@@ -62,4 +63,14 @@ public interface UserArticleMapper extends BaseMapper<UserArticle> {
      * @Date 2020/8/20 22:37
      */
     List<PraiseUserVo> getPraiseUserListByArticleId(Long articleId);
+
+    /**
+     * 获取用户的文章列表数据
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/23 14:59
+     */
+    List<ArticleVo> getUserArticles(Long userId);
 }

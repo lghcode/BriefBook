@@ -1,6 +1,9 @@
 package com.lghcode.briefbook.service;
 
+import com.lghcode.briefbook.model.vo.ArticleVo;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @Author:LaLion
@@ -72,4 +75,24 @@ public interface UserArticleService {
      * @Date 2020/8/22 11:00
      */
     void userPraiseArticle(Long userId, String diamond, Long articleId);
+
+    /**
+     * 取用户赞过的文章数量
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return Integer
+     * @Date 2020/8/23 14:43
+     */
+    Integer getUserLikeArticleCount(Long userId);
+
+    /**
+     * 获取用户的文章列表数据
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return List<ArticleVo>
+     * @Date 2020/8/23 14:59
+     */
+    List<ArticleVo> getUserArticles(Long userId);
 }

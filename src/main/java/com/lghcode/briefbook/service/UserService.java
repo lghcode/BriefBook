@@ -3,11 +3,14 @@ package com.lghcode.briefbook.service;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.LoginUserInfo;
+import com.lghcode.briefbook.model.vo.UserIndexVo;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @Author lgh
  * @Date 2020/8/10 10:20
  */
+@Transactional(rollbackFor = Exception.class)
 public interface UserService {
 
     /**
@@ -133,4 +136,15 @@ public interface UserService {
      * @Date 2020/8/21 17:52
      */
     void followUser(Long followUserId, Integer type,Long userId);
+
+    /**
+     * 查看用户主页
+     *
+     * @Author lghcode
+     * @param  authToken 用户登录token
+     * @param  userId 用户id
+     * @return UserIndexVo
+     * @Date 2020/8/23 11:15
+     */
+    UserIndexVo getUserIndex(String authToken, Long userId);
 }

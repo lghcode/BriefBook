@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lghcode.briefbook.constant.Constant;
+import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.mapper.*;
@@ -12,6 +13,7 @@ import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
 import com.lghcode.briefbook.model.vo.*;
 import com.lghcode.briefbook.service.ArticleService;
+import com.lghcode.briefbook.service.UserActionService;
 import com.lghcode.briefbook.util.JwtTokenUtil;
 import com.lghcode.briefbook.util.PageResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +37,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private UserArticleMapper userArticleMapper;
+
+    @Autowired
+    private UserActionService userActionService;
 
     @Autowired
     private CorpusMapper corpusMapper;
@@ -80,6 +85,8 @@ public class ArticleServiceImpl implements ArticleService {
                 .createTime(new Date())
                 .build();
         userArticleMapper.insert(userArticle);
+        //同步到用户动态表
+        userActionService.newAction(articleParam.getUserId(),UserActionEnum.PUBLISH.getCode(),article.getId(),UserActionEnum.ARTICLE.getCode());
     }
 
     /**

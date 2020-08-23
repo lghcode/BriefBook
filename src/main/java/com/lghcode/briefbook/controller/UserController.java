@@ -1,6 +1,7 @@
 package com.lghcode.briefbook.controller;
 
 import cn.hutool.core.util.RandomUtil;
+import com.lghcode.briefbook.constant.Constant;
 import com.lghcode.briefbook.constant.TencentSmsConstant;
 import com.lghcode.briefbook.enums.EditProfileEnum;
 import com.lghcode.briefbook.enums.SendSmsEnum;
@@ -11,6 +12,7 @@ import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.LoginUserInfo;
+import com.lghcode.briefbook.model.vo.UserIndexVo;
 import com.lghcode.briefbook.service.SmsCodeService;
 import com.lghcode.briefbook.service.UserService;
 import com.lghcode.briefbook.util.*;
@@ -347,5 +349,20 @@ public class UserController {
         Long userId = jwtTokenUtil.getUserIdFromHeader(request);
         userService.followUser(followUserId,type,userId);
         return ResultJson.success("操作成功");
+    }
+
+    /**
+     * 查看用户主页
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/23 11:15
+     */
+    @PostMapping("/index")
+    public ResultJson index(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId,HttpServletRequest request){
+        String authToken = request.getHeader(Constant.TOKEN_NAME);
+        UserIndexVo userIndexVo = userService.getUserIndex(authToken,userId);
+        return ResultJson.success("查询成功",userIndexVo);
     }
 }

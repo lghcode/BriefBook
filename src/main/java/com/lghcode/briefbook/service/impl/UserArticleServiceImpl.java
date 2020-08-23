@@ -1,18 +1,22 @@
 package com.lghcode.briefbook.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.mapper.ArticleMapper;
 import com.lghcode.briefbook.mapper.UserArticleMapper;
 import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.UserArticle;
+import com.lghcode.briefbook.model.vo.ArticleVo;
+import com.lghcode.briefbook.service.UserActionService;
 import com.lghcode.briefbook.service.UserArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Author:LaLion
@@ -24,6 +28,9 @@ public class UserArticleServiceImpl implements UserArticleService {
 
     @Autowired
     private UserArticleMapper userArticleMapper;
+
+    @Autowired
+    private UserActionService userActionService;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -98,6 +105,8 @@ public class UserArticleServiceImpl implements UserArticleService {
             diamondCount = diamondCount.add(new BigDecimal("0.002"));
             article.setDiamondCount(diamondCount);
             articleMapper.updateById(article);
+            //同步到用户动态表
+            userActionService.newAction(userId,UserActionEnum.LIKE.getCode(),articleId,UserActionEnum.ARTICLE.getCode());
         }else if(type == UserEnum.CANNEL_FOLLOW.getCode()) {
             //取消点赞
             userArticleMapper.delete(new QueryWrapper<UserArticle>().lambda()
@@ -114,6 +123,8 @@ public class UserArticleServiceImpl implements UserArticleService {
                 article.setDiamondCount(diamondCount);
                 articleMapper.updateById(article);
             }
+            //同步到用户动态表
+            userActionService.cannelAction(userId,UserActionEnum.LIKE.getCode(),articleId);
         }
     }
 
@@ -141,12 +152,16 @@ public class UserArticleServiceImpl implements UserArticleService {
             UserArticle userArticle = UserArticle.builder().userId(userId).articleId(articleId)
                     .type(UserEnum.USER_COLLECT_ARTICLE.getCode()).createTime(new Date()).build();
             userArticleMapper.insert(userArticle);
+            //同步到用户动态表
+            userActionService.newAction(userId,UserActionEnum.COLLECT.getCode(),articleId, UserActionEnum.ARTICLE.getCode());
         }else if(type == UserEnum.CANNEL_FOLLOW.getCode()) {
             //取消收藏
             userArticleMapper.delete(new QueryWrapper<UserArticle>().lambda()
                     .eq(UserArticle::getUserId,userId)
                     .eq(UserArticle::getArticleId,articleId)
                     .eq(UserArticle::getType,UserEnum.USER_COLLECT_ARTICLE.getCode()));
+            //同步到用户动态表
+            userActionService.cannelAction(userId,UserActionEnum.COLLECT.getCode(),articleId);
         }
     }
 
@@ -179,5 +194,34 @@ public class UserArticleServiceImpl implements UserArticleService {
         diamondCount = diamondCount.add(new BigDecimal(diamond));
         article.setDiamondCount(diamondCount);
         articleMapper.updateById(article);
+        //同步到用户动态表
+        userActionService.newAction(userId,UserActionEnum.PRAISE.getCode(),articleId,UserActionEnum.ARTICLE.getCode());
+    }
+
+    /**
+     * 取用户赞过的文章数量
+     *
+     * @param userId 用户id
+     * @return Integer
+     * @Author lghcode
+     * @Date 2020/8/23 14:43
+     */
+    @Override
+    public Integer getUserLikeArticleCount(Long userId) {
+        return userArticleMapper.selectCount(new QueryWrapper<UserArticle>().lambda()
+                .eq(UserArticle::getUserId,userId).eq(UserArticle::getType,UserEnum.USER_LIKE_ARTICLE.getCode()));
+    }
+
+    /**
+     * 获取用户的文章列表数据
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/23 14:59
+     */
+    @Override
+    public List<ArticleVo> getUserArticles(Long userId) {
+        return userArticleMapper.getUserArticles(userId);
     }
 }

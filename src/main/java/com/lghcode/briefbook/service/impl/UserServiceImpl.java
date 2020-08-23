@@ -5,26 +5,26 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lghcode.briefbook.constant.Constant;
 import com.lghcode.briefbook.enums.EditProfileEnum;
+import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
+import com.lghcode.briefbook.exception.ErrorCodeEnum;
 import com.lghcode.briefbook.mapper.UserFansMapper;
 import com.lghcode.briefbook.mapper.UserMapper;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.UserFans;
 import com.lghcode.briefbook.model.param.EditProfileParam;
-import com.lghcode.briefbook.model.vo.LoginUser;
-import com.lghcode.briefbook.model.vo.LoginUserInfo;
-import com.lghcode.briefbook.model.vo.UserCount;
-import com.lghcode.briefbook.service.UserArticleService;
-import com.lghcode.briefbook.service.UserFansService;
-import com.lghcode.briefbook.service.UserService;
+import com.lghcode.briefbook.model.vo.*;
+import com.lghcode.briefbook.service.*;
 import com.lghcode.briefbook.util.JwtTokenUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,6 +39,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserFansMapper userFansMapper;
+
+    @Autowired
+    private UserActionService userActionService;
+
+    @Autowired
+    private UserCorpusService userCorpusService;
+
+    @Autowired
+    private CorpusService corpusService;
 
     @Autowired
     private UserFansService userFansService;
@@ -166,6 +175,8 @@ public class UserServiceImpl implements UserService {
                updateTime(new Date()).
                build();
        userMapper.insert(user);
+       //同步到用户动态表
+       userActionService.newAction(user.getId(),UserActionEnum.REGISTER.getCode(),null,UserActionEnum.USER.getCode());
     }
 
     /**
@@ -288,10 +299,77 @@ public class UserServiceImpl implements UserService {
             }
             UserFans userFans = UserFans.builder().userId(followUserId).fansId(userId).createTime(new Date()).build();
             userFansMapper.insert(userFans);
+            //同步到用户动态表
+            userActionService.newAction(userId,UserActionEnum.FOLLOW.getCode(),followUserId,UserActionEnum.USER.getCode());
         }else if (type == UserEnum.CANNEL_FOLLOW.getCode()){
             //取消关注
             userFansMapper.delete(new QueryWrapper<UserFans>().lambda().eq(UserFans::getUserId,followUserId)
                                 .eq(UserFans::getFansId,userId));
+            //同步到用户动态表
+            userActionService.cannelAction(userId,UserActionEnum.FOLLOW.getCode(),followUserId);
         }
+    }
+
+    /**
+     * 查看用户主页
+     *
+     * @param authToken 用户登录token
+     * @param userId    用户id
+     * @return UserIndexVo
+     * @Author lghcode
+     * @Date 2020/8/23 11:15
+     */
+    @Override
+    public UserIndexVo getUserIndex(String authToken, Long userId) {
+        UserIndexVo userIndexVo = new UserIndexVo();
+        //如果authToken不等于空并且没有过期
+        if (!StringUtils.isBlank(authToken) && redisTemplate.hasKey(Constant.REDIS_LOGIN_KEY+authToken)){
+            Long loginUserId = jwtTokenUtil.getUserIdFromToken(authToken);
+            //判断当前登录用户有没有对该文章作者关注
+            Integer m = userFansMapper.selectCount(new QueryWrapper<UserFans>().lambda()
+                    .eq(UserFans::getUserId,userId)
+                    .eq(UserFans::getFansId,loginUserId));
+            if (m > 0){
+                userIndexVo.setFollow(true);
+            }
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null){
+            throw new BizException(ErrorCodeEnum.DATA_NULL);
+        }
+        BeanUtils.copyProperties(user,userIndexVo);
+        //获取用户关注的数量
+        Integer attentionCount =  userFansService.getUserAttentionCount(userId);
+        userIndexVo.setAttentionCount(attentionCount);
+        //获取当前用户的粉丝数量
+        Integer fansCount = userFansService.getUserFansCount(userId);
+        userIndexVo.setFansCount(fansCount);
+        //获取当前用户发布的公开文章的总字数
+        Integer wordCount = userArticleService.getUserWordCount(userId);
+        userIndexVo.setWordCount(wordCount);
+        //获取当前用户收获文章赞的数量
+        Integer approvalCount = userArticleService.getUserApprovalCount(userId);
+        userIndexVo.setApprovalCount(approvalCount);
+        //获取用户文集数量
+        Integer corpusCount = corpusService.getUserCorpusCount(userId);
+        userIndexVo.setCorpusCount(corpusCount);
+        //获取用户赞过的文章数量
+        Integer likeArticleCount = userArticleService.getUserLikeArticleCount(userId);
+        userIndexVo.setLikeArticleCount(likeArticleCount);
+        //获取用户关注的文集数量
+        Integer followCorpusCount = userCorpusService.getUserCorpusCount(userId);
+        userIndexVo.setFollowCorpusCount(followCorpusCount);
+        //获取用户文章列表数据
+        List<ArticleVo> articleVoList = userArticleService.getUserArticles(userId);
+        userIndexVo.setArticleVos(articleVoList);
+        //获取用户文章数量
+        if (articleVoList == null){
+            userIndexVo.setArticleCount(0);
+        }
+        userIndexVo.setArticleCount(articleVoList.size());
+        //获取用户动态列表
+        List<UserActionVo> userActionVoList = userActionService.getUserActions(userId);
+        userIndexVo.setUserActionVos(userActionVoList);
+        return userIndexVo;
     }
 }

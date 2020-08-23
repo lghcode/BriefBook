@@ -1,6 +1,7 @@
 package com.lghcode.briefbook.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.mapper.CommentMapper;
@@ -9,6 +10,7 @@ import com.lghcode.briefbook.model.Comment;
 import com.lghcode.briefbook.model.UserLikeComment;
 import com.lghcode.briefbook.model.param.CommentPublishParam;
 import com.lghcode.briefbook.service.CommentService;
+import com.lghcode.briefbook.service.UserActionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private UserLikeCommentMapper userLikeCommentMapper;
+
+    @Autowired
+    private UserActionService userActionService;
     /**
      * 发表或回复评论
      *
@@ -46,6 +51,8 @@ public class CommentServiceImpl implements CommentService {
                 .createTime(new Date())
                 .build();
         commentMapper.insert(comment);
+        //同步到用户动态表
+        userActionService.newAction(userId,UserActionEnum.COMMENT.getCode(),comment.getId(),UserActionEnum.COMMEN.getCode());
     }
 
     /**
@@ -71,11 +78,15 @@ public class CommentServiceImpl implements CommentService {
             UserLikeComment userLikeComment = UserLikeComment.builder()
                                         .userId(userId).commentId(commentId).build();
             userLikeCommentMapper.insert(userLikeComment);
+            //同步到用户动态表
+            userActionService.newAction(userId, UserActionEnum.LIKE.getCode(),commentId,UserActionEnum.COMMEN.getCode());
         }else if(type == UserEnum.CANNEL_FOLLOW.getCode()){
             //取消点赞
             userLikeCommentMapper.delete(new QueryWrapper<UserLikeComment>().lambda()
                     .eq(UserLikeComment::getUserId,userId)
                     .eq(UserLikeComment::getCommentId,commentId));
+            //同步到用户动态表
+            userActionService.cannelAction(userId, UserActionEnum.LIKE.getCode(),commentId);
         }
     }
 }

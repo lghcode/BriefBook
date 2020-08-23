@@ -34,6 +34,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.excludePathPatterns("/user/loginSms")
 				.excludePathPatterns("/user/loginPw")
 				.excludePathPatterns("/user/sendSms")
+				.excludePathPatterns("/user/index")
 				.excludePathPatterns("/article/getArticleById")
 				.excludePathPatterns("/article/recommendArticle")
 		;
