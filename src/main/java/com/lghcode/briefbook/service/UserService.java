@@ -2,9 +2,13 @@ package com.lghcode.briefbook.service;
 
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
+import com.lghcode.briefbook.model.vo.CorpusListVo;
 import com.lghcode.briefbook.model.vo.LoginUserInfo;
 import com.lghcode.briefbook.model.vo.UserIndexVo;
+import com.lghcode.briefbook.model.vo.UserListVo;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @Author lgh
@@ -155,4 +159,36 @@ public interface UserService {
      * @Date 2020/8/23 22:13
      */
     void settleDiamondTask();
+
+    /**
+     * 查看用户的关注列表
+     *
+     * @Author lghcode
+     * @param authToken 用户登录token
+     * @param userId 用户id
+     * @return List<UserListVo>
+     * @Date 2020/8/24 8:01
+     */
+    List<UserListVo> getUserFollowList(String authToken, Long userId);
+
+    /**
+     * 查看用户的粉丝列表
+     *
+     * @Author lghcode
+     * @param authToken 用户登录token
+     * @param userId 用户id
+     * @return List<UserListVo>
+     * @Date 2020/8/24 8:01
+     */
+    List<UserListVo> getUserFansList(String authToken, Long userId);
+
+    /**
+     * 查看用户的文集列表
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return List<CorpusListVo>
+     * @Date 2020/8/24 9:18
+     */
+    List<CorpusListVo> getUserCorpusList(Long userId);
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lghcode.briefbook.mapper.UserCorpusMapper" >
+
+    <select id="selectUserList" resultType="com.lghcode.briefbook.model.vo.UserBaseVo">
+        select
+        u.id as userId,
+        u.nick_name as userName,
+        u.head_img as headImg
+        from user_corpus uc
+        left join user u
+        on uc.user_id = u.id
+        where uc.corpus_id = #{corpusId}
+    </select>
+
+</mapper>

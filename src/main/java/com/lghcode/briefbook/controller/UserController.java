@@ -11,22 +11,20 @@ import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
-import com.lghcode.briefbook.model.vo.LoginUserInfo;
-import com.lghcode.briefbook.model.vo.UserIndexVo;
+import com.lghcode.briefbook.model.vo.*;
+import com.lghcode.briefbook.service.CorpusService;
 import com.lghcode.briefbook.service.SmsCodeService;
 import com.lghcode.briefbook.service.UserService;
 import com.lghcode.briefbook.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户模块控制层
@@ -49,6 +47,9 @@ public class UserController {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private CorpusService corpusService;
 
     /**
      * 用户登录(手机号验证码登录)
@@ -364,5 +365,82 @@ public class UserController {
         String authToken = request.getHeader(Constant.TOKEN_NAME);
         UserIndexVo userIndexVo = userService.getUserIndex(authToken,userId);
         return ResultJson.success("查询成功",userIndexVo);
+    }
+    
+    /**
+     * 查看用户的关注列表
+     *
+     * @Author lghcode
+     * @param userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/24 8:01
+     */
+    @GetMapping("/followList")
+    public ResultJson followList(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId,HttpServletRequest request){
+        String authToken = request.getHeader(Constant.TOKEN_NAME);
+        List<UserListVo> userListVoList = userService.getUserFollowList(authToken,userId);
+        return ResultJson.success("查询成功",userListVoList);
+    }
+
+    /**
+     * 查看用户的粉丝列表
+     *
+     * @Author lghcode
+     * @param userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/24 8:01
+     */
+    @GetMapping("/fansList")
+    public ResultJson fansList(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId,HttpServletRequest request){
+        String authToken = request.getHeader(Constant.TOKEN_NAME);
+        List<UserListVo> userListVoList = userService.getUserFansList(authToken,userId);
+        return ResultJson.success("查询成功",userListVoList);
+    }
+
+    /**
+     * 查看用户的文集列表
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/24 9:18
+     */
+    @GetMapping("/corpusList")
+    public ResultJson corpusList(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId){
+        List<CorpusListVo> corpusListVos = userService.getUserCorpusList(userId);
+        return ResultJson.success("查询成功",corpusListVos);
+    }
+
+    /**
+     * 查看文集详情
+     *
+     * @Author lghcode
+     * @param corpusId 文集id
+     * @return ResultJson
+     * @Date 2020/8/24 10:06
+     */
+    @GetMapping("/corpusDetail")
+    public ResultJson corpusDetail(@NotNull(message = "文集id不能为空") @RequestParam("corpusId") Long corpusId, HttpServletRequest request){
+        String authToken = request.getHeader(Constant.TOKEN_NAME);
+        CorpusDetailVo corpusDetailVo = corpusService.getCorpusDetail(authToken,corpusId);
+        return ResultJson.success("查询成功",corpusDetailVo);
+    }
+
+    /**
+     * 关注或取消关注 文集
+     *
+     * @Author lghcode
+     * @param corpusId 文集id
+     * @param type 类型id
+     * @return ResultJson
+     * @Date 2020/8/24 11:33
+     */
+    @PostMapping("/followCorpus")
+    public ResultJson followCorpus(@NotNull(message = "文集id不能为空") @RequestParam("corpusId") Long corpusId,
+                                   @NotNull(message = "关注类型不能为空") @RequestParam("type") Integer type,HttpServletRequest request){
+
+        Long currentUserId = jwtTokenUtil.getUserIdFromHeader(request);
+        corpusService.followCorpus(currentUserId,corpusId,type);
+        return ResultJson.success("操作成功");
     }
 }

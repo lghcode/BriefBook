@@ -2,5 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lghcode.briefbook.mapper.UserMapper" >
 
+    <select id="getUserCorpusList" resultType="com.lghcode.briefbook.model.vo.CorpusListVo">
+        select
+            c.id as corpusId,
+            c.name as name,
+            u.nick_name as creator
+        from corpus c
+        left join user u
+        on c.creator_id = u.id
+        where c.creator_id = #{userId}
+    </select>
 
 </mapper>

@@ -17,4 +17,19 @@
         where status = 0
         and (title like CONCAT('%',#{keyWord},'%') or cont like CONCAT('%',#{keyWord},'%'))
     </select>
+
+    <select id="selectListByCorpusId" resultType="com.lghcode.briefbook.model.vo.ArticleVo">
+        select
+               a.id,
+               a.title,
+               a.cont,
+               a.diamond_count as diamondCount,
+               a.read_count as readCount,
+               a.like_count as likeCount,
+               a.publish_time as publishTime,
+               (select count(*) from comment c where c.article_id = a.id) as commentCount
+        from  article a
+        where a.corpus_id = #{corpusId}
+          and a.status = 0
+    </select>
 </mapper>

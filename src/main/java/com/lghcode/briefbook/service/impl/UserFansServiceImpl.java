@@ -3,9 +3,12 @@ package com.lghcode.briefbook.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lghcode.briefbook.mapper.UserFansMapper;
 import com.lghcode.briefbook.model.UserFans;
+import com.lghcode.briefbook.model.vo.UserListVo;
 import com.lghcode.briefbook.service.UserFansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Author:LaLion
@@ -45,5 +48,31 @@ public class UserFansServiceImpl implements UserFansService {
         return userFansMapper.selectCount(new QueryWrapper<UserFans>()
                 .lambda().eq(UserFans::getUserId,userId)
         );
+    }
+
+    /**
+     * 获取某个用户关注的用户列表数据
+     *
+     * @param userId 某个用户id
+     * @return List<UserListVo>
+     * @Author lghcode
+     * @Date 2020/8/24 8:15
+     */
+    @Override
+    public List<UserListVo> getUserFollow(Long userId) {
+        return userFansMapper.getUserFollow(userId);
+    }
+
+    /**
+     * 获取某个用户的粉丝用户列表数据
+     *
+     * @param userId 某个用户id
+     * @return List<UserListVo>
+     * @Author lghcode
+     * @Date 2020/8/24 8:15
+     */
+    @Override
+    public List<UserListVo> getUserFans(Long userId) {
+        return userFansMapper.getUserFans(userId);
     }
 }

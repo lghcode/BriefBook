@@ -10,14 +10,8 @@ import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.exception.ErrorCodeEnum;
-import com.lghcode.briefbook.mapper.ArticleMapper;
-import com.lghcode.briefbook.mapper.UserArticleMapper;
-import com.lghcode.briefbook.mapper.UserFansMapper;
-import com.lghcode.briefbook.mapper.UserMapper;
-import com.lghcode.briefbook.model.Article;
-import com.lghcode.briefbook.model.User;
-import com.lghcode.briefbook.model.UserArticle;
-import com.lghcode.briefbook.model.UserFans;
+import com.lghcode.briefbook.mapper.*;
+import com.lghcode.briefbook.model.*;
 import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.*;
 import com.lghcode.briefbook.service.*;
@@ -45,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserFansMapper userFansMapper;
+
+    @Autowired
+    private UserCorpusMapper userCorpusMapper;
 
     @Autowired
     private UserActionService userActionService;
@@ -412,5 +409,89 @@ public class UserServiceImpl implements UserService {
             user.setDiamondTotal(totalDiamondCount);
             userMapper.updateById(user);
         }
+    }
+
+    /**
+     * 查看用户的关注列表
+     *
+     * @param authToken 用户登录token
+     * @param userId    用户id
+     * @return List<UserListVo>
+     * @Author lghcode
+     * @Date 2020/8/24 8:01
+     */
+    @Override
+    public List<UserListVo> getUserFollowList(String authToken, Long userId) {
+        List<UserListVo> userListVoList = userFansService.getUserFollow(userId);
+        if (userListVoList == null){
+            return null;
+        }
+        return setUserListVoData(authToken, userListVoList);
+    }
+
+    /**
+     * 查看用户的粉丝列表
+     *
+     * @param authToken 用户登录token
+     * @param userId    用户id
+     * @return List<UserListVo>
+     * @Author lghcode
+     * @Date 2020/8/24 8:01
+     */
+    @Override
+    public List<UserListVo> getUserFansList(String authToken, Long userId) {
+        List<UserListVo> userListVoList = userFansService.getUserFans(userId);
+        if (userListVoList == null){
+            return null;
+        }
+        return setUserListVoData(authToken, userListVoList);
+    }
+
+    /**
+     * 查看用户的文集列表
+     *
+     * @param userId 用户id
+     * @return List<CorpusListVo>
+     * @Author lghcode
+     * @Date 2020/8/24 9:18
+     */
+    @Override
+    public List<CorpusListVo> getUserCorpusList(Long userId) {
+        List<CorpusListVo> corpusList = userMapper.getUserCorpusList(userId);
+        if (corpusList == null){
+            return null;
+        }
+        for (CorpusListVo corpusListVo : corpusList) {
+            //获取文集所属文章的数量
+            Integer articleCount = articleMapper.selectCount(new QueryWrapper<Article>().lambda().eq(Article::getCorpusId,corpusListVo.getCorpusId()));
+            corpusListVo.setArticleCount(articleCount);
+            //获取文集被关注的数量
+            Integer followCount = userCorpusMapper.selectCount(new QueryWrapper<UserCorpus>().lambda().eq(UserCorpus::getCorpusId,corpusListVo.getCorpusId()));
+            corpusListVo.setFollowCount(followCount);
+        }
+        return corpusList;
+    }
+
+    private List<UserListVo> setUserListVoData(String authToken, List<UserListVo> userListVoList) {
+        for (UserListVo userListVo : userListVoList) {
+            //获取当前用户发布的公开文章的总字数
+            Integer wordCount = userArticleService.getUserWordCount(userListVo.getUserId());
+            userListVo.setWordCount(wordCount);
+            //获取当前用户收获文章赞的数量
+            Integer approvalCount = userArticleService.getUserApprovalCount(userListVo.getUserId());
+            userListVo.setLikeCount(approvalCount);
+            //如果authToken不等于空并且没有过期
+            if (!StringUtils.isBlank(authToken) && redisTemplate.hasKey(Constant.REDIS_LOGIN_KEY+authToken)){
+                Long loginUserId = jwtTokenUtil.getUserIdFromToken(authToken);
+                //判断当前登录用户有没有对这些用户关注过
+                Integer m = userFansMapper.selectCount(new QueryWrapper<UserFans>().lambda()
+                        .eq(UserFans::getUserId,userListVo.getUserId())
+                        .eq(UserFans::getFansId,loginUserId));
+                if (m > 0){
+                    userListVo.setFollow(true);
+                }
+            }
+        }
+        return userListVoList;
     }
 }
