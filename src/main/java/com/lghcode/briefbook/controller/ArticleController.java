@@ -1,11 +1,14 @@
 package com.lghcode.briefbook.controller;
 
 import com.lghcode.briefbook.constant.Constant;
+import com.lghcode.briefbook.enums.ArticleEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
+import com.lghcode.briefbook.model.param.UpdateArticleParam;
 import com.lghcode.briefbook.model.vo.ArticleDetailVo;
+import com.lghcode.briefbook.model.vo.RecycleBinListVo;
 import com.lghcode.briefbook.service.ArticleService;
 import com.lghcode.briefbook.service.UserArticleService;
 import com.lghcode.briefbook.util.JwtTokenUtil;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 文章模块控制层
@@ -54,6 +58,20 @@ public class ArticleController {
         }
         articleService.publishArticle(articleParam);
         return ResultJson.success("发布成功");
+    }
+
+    /**
+     * 根据文章id获取文章内容
+     *
+     * @Author lghcode
+     * @param  articleId 文章id不能为空
+     * @return ResultJson
+     * @Date 2020/8/25 18:52
+     */
+    @GetMapping("/getOneArticle")
+    public ResultJson getOneArticle(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId){
+        Article article = articleService.getOneById(articleId);
+        return ResultJson.success("获取成功",article);
     }
 
     /**
@@ -137,5 +155,107 @@ public class ArticleController {
         Long userId = jwtTokenUtil.getUserIdFromHeader(request);
         userArticleService.userPraiseArticle(userId,diamond,articleId);
         return ResultJson.success("操作成功");
+    }
+
+    /**
+     * 更新文章
+     *
+     * @Author lghcode
+     * @param updateArticleParam 更新参数
+     * @return ResultJson
+     * @Date 2020/8/25 15:23
+     */
+    @PostMapping("/updateArticle")
+    public ResultJson updateArticle(@Validated UpdateArticleParam updateArticleParam){
+        articleService.updateArticle(updateArticleParam);
+        return ResultJson.success("更新成功");
+    }
+
+    /**
+     * 将公开文章设为私密文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @return ResultJson
+     * @Date 2020/8/25 15:23
+     */
+    @PostMapping("/setPrivate")
+    public ResultJson setPrivate(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId){
+        articleService.setArticleAccess(articleId,ArticleEnum.PRIVATE_ARTICLE.getCode());
+        return ResultJson.success("设置成功");
+    }
+
+    /**
+     * 将私密文章发布公开
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @return ResultJson
+     * @Date 2020/8/25 15:23
+     */
+    @PostMapping("/setPublic")
+    public ResultJson setPublic(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId){
+        articleService.setArticleAccess(articleId,ArticleEnum.PUBLIC_ARTICLE.getCode());
+        return ResultJson.success("设置成功");
+    }
+
+    /**
+     * 删除文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @return ResultJson
+     * @Date 2020/8/25 18:26
+     */
+    @PostMapping("/delete")
+    public ResultJson delete(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId){
+        articleService.deleteArticle(articleId);
+        return ResultJson.success("删除成功");
+    }
+
+    /**
+     * 获取用户的回收站文章列表
+     *
+     * @Author lghcode
+     * @param userId 当前登录用户id
+     * @return ResultJson
+     * @Date 2020/8/25 19:08
+     */
+    @GetMapping("/recycleBinList")
+    public ResultJson recycleBinList(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId,HttpServletRequest request){
+        Long curUserId = jwtTokenUtil.getUserIdFromHeader(request);
+        if (!curUserId.equals(userId)){
+            throw new BizException("非法访问");
+        }
+        List<RecycleBinListVo> recycleBinListVos = articleService.getRecycleBinList(curUserId);
+        return ResultJson.success("查询成功",recycleBinListVos);
+    }
+
+    /**
+     * 彻底删除文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @return ResultJson
+     * @Date 2020/8/25 18:26
+     */
+    @PostMapping("/deleteForever")
+    public ResultJson deleteForever(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId){
+        articleService.deleteForeverArticle(articleId);
+        return ResultJson.success("删除成功");
+    }
+
+    /**
+     * 恢复文章
+     *
+     * @Author lghcode
+     * @param articleId 文章id
+     * @return ResultJson
+     * @Date 2020/8/25 18:26
+     */
+    @PostMapping("/restore")
+    public ResultJson restore(@NotNull(message = "文章id不能为空") @RequestParam("articleId") Long articleId){
+        articleService.restoreArticle(articleId);
+        return ResultJson.success("恢复成功");
     }
 }

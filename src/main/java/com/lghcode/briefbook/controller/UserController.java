@@ -12,6 +12,7 @@ import com.lghcode.briefbook.model.SmsCode;
 import com.lghcode.briefbook.model.User;
 import com.lghcode.briefbook.model.param.EditProfileParam;
 import com.lghcode.briefbook.model.vo.*;
+import com.lghcode.briefbook.service.ArticleService;
 import com.lghcode.briefbook.service.CorpusService;
 import com.lghcode.briefbook.service.SmsCodeService;
 import com.lghcode.briefbook.service.UserService;
@@ -50,6 +51,9 @@ public class UserController {
 
     @Autowired
     private CorpusService corpusService;
+
+    @Autowired
+    private ArticleService articleService;
 
     /**
      * 用户登录(手机号验证码登录)
@@ -412,6 +416,20 @@ public class UserController {
     }
 
     /**
+     * 查看用户关注的文集列表
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/24 9:18
+     */
+    @GetMapping("/likeCorpusList")
+    public ResultJson likeCorpusList(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId) {
+        List<CorpusListVo> corpusListVos = userService.getUserLikeCorpusList(userId);
+        return ResultJson.success("查询成功",corpusListVos);
+    }
+
+    /**
      * 查看文集详情
      *
      * @Author lghcode
@@ -442,5 +460,76 @@ public class UserController {
         Long currentUserId = jwtTokenUtil.getUserIdFromHeader(request);
         corpusService.followCorpus(currentUserId,corpusId,type);
         return ResultJson.success("操作成功");
+    }
+
+    /**
+     * 新建文集
+     *
+     * @Author lghcode
+     * @param name 文集名
+     * @return ResultJson
+     * @Date 2020/8/25 9:59
+     */
+    @PostMapping("/createCorpus")
+    public ResultJson createCorpus(@NotNull(message = "文集名不能为空") @RequestParam("name") String name,HttpServletRequest request){
+        Long loginUserId = jwtTokenUtil.getUserIdFromHeader(request);
+        corpusService.create(loginUserId,name);
+        return ResultJson.success("新建文集成功");
+    }
+
+    /**
+     * 查看用户赞过的文章列表
+     *
+     * @Author lghcode
+     * @param userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/25 9:59
+     */
+    @GetMapping("/likeArticles")
+    public ResultJson likeArticles(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId){
+        List<ArticleVo> articleVoList = articleService.queryUserLikeArticles(userId);
+        return ResultJson.success("查询成功",articleVoList);
+    }
+
+    /**
+     * 查看用户收藏过的文章列表
+     *
+     * @Author lghcode
+     * @param userId 用户id
+     * @return ResultJson
+     * @Date 2020/8/25 9:59
+     */
+    @GetMapping("/collectArticles")
+    public ResultJson collectArticles(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId){
+        List<ArticleVo> articleVoList = articleService.queryUserCollectArticles(userId);
+        return ResultJson.success("查询成功",articleVoList);
+    }
+    
+    /**
+     * 查看用户的公开文章列表
+     *
+     * @Author lghcode
+     * @param userId 当前登录用户id
+     * @return ResultJson
+     * @Date 2020/8/25 14:51
+     */
+    @GetMapping("/publicArticles")
+    public ResultJson publicArticles(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId){
+        List<ArticleVo> articleVoList = articleService.queryUserPublicArticles(userId);
+        return ResultJson.success("查询成功",articleVoList);
+    }
+
+    /**
+     * 查看用户的私密文章列表
+     *
+     * @Author lghcode
+     * @param userId 当前登录用户id
+     * @return ResultJson
+     * @Date 2020/8/25 14:51
+     */
+    @GetMapping("/privateArticles")
+    public ResultJson privateArticles(@NotNull(message = "用户id不能为空") @RequestParam("userId") Long userId){
+        List<ArticleVo> articleVoList = articleService.queryUserPrivateArticles(userId);
+        return ResultJson.success("查询成功",articleVoList);
     }
 }

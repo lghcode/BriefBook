@@ -461,6 +461,27 @@ public class UserServiceImpl implements UserService {
         if (corpusList == null){
             return null;
         }
+        return handleCorpusListVo(corpusList);
+    }
+
+    /**
+     * 查看用户关注的文集列表
+     *
+     * @param userId 用户id
+     * @return List<CorpusListVo>
+     * @Author lghcode
+     * @Date 2020/8/24 9:18
+     */
+    @Override
+    public List<CorpusListVo> getUserLikeCorpusList(Long userId) {
+        List<CorpusListVo> corpusList = userMapper.getUserLikeCorpusList(userId);
+        if (corpusList == null){
+            return null;
+        }
+        return handleCorpusListVo(corpusList);
+    }
+
+    private List<CorpusListVo> handleCorpusListVo(List<CorpusListVo> corpusList) {
         for (CorpusListVo corpusListVo : corpusList) {
             //获取文集所属文章的数量
             Integer articleCount = articleMapper.selectCount(new QueryWrapper<Article>().lambda().eq(Article::getCorpusId,corpusListVo.getCorpusId()));

@@ -11,6 +11,19 @@ public enum  ArticleEnum implements BaseEnum{
      */
     NOT_SETTLE(0,"未清算"),
     ALREADY_SETTLE(1,"已清算"),
+
+    /**
+     * 文章访问枚举
+     */
+    PUBLIC_ARTICLE(0,"公开"),
+    PRIVATE_ARTICLE(1,"私密"),
+
+    /**
+     * 文章状态
+     */
+    NORMAL(0,"正常"),
+    RECYCLE(1,"回收"),
+    DELETE(2,"删除")
     ;
     private int code;
     private String desc;

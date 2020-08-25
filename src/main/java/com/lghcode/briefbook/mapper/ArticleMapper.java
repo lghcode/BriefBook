@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lghcode.briefbook.model.Article;
 import com.lghcode.briefbook.model.vo.ArticleVo;
+import com.lghcode.briefbook.model.vo.RecycleBinListVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -34,4 +35,10 @@ public interface ArticleMapper extends BaseMapper<Article> {
     IPage<Article> selectListPage(Page<Article> page);
 
     List<ArticleVo> selectListByCorpusId(Long corpusId);
+
+    List<ArticleVo> queryUserLikeArticles(Long userId);
+
+    List<ArticleVo> queryUserCollectArticles(Long userId);
+
+    List<RecycleBinListVo> selectRecycleBinList(Long curUserId);
 }

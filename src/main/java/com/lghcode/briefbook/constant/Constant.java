@@ -12,4 +12,6 @@ public interface Constant {
     String REDIS_LOGIN_KEY= "briefbook:login:";
 
     Integer REDIS_LOGIN_EXPRIE= 30;
+
+    Integer ARTICLE_CACHE_DAY = 59;
 }

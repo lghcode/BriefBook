@@ -65,7 +65,7 @@ public interface UserArticleMapper extends BaseMapper<UserArticle> {
     List<PraiseUserVo> getPraiseUserListByArticleId(Long articleId);
 
     /**
-     * 获取用户的文章列表数据
+     * 获取用户的公开文章列表数据
      *
      * @param userId 用户id
      * @return List<ArticleVo>
@@ -73,4 +73,14 @@ public interface UserArticleMapper extends BaseMapper<UserArticle> {
      * @Date 2020/8/23 14:59
      */
     List<ArticleVo> getUserArticles(Long userId);
+
+    /**
+     * 获取用户的私密文章列表数据
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/23 14:59
+     */
+    List<ArticleVo> getUserPrivateArticles(Long userId);
 }

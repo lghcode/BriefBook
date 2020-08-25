@@ -76,6 +76,11 @@ public class Article {
     private Integer status;
 
     /**
+     * 回收站缓存天数
+     */
+    private Integer cacheDay;
+
+    /**
      * 0--未清算，1--已清算
      */
     private Integer isSettle;

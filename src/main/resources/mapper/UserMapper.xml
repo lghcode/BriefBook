@@ -13,4 +13,17 @@
         where c.creator_id = #{userId}
     </select>
 
+    <select id="getUserLikeCorpusList" resultType="com.lghcode.briefbook.model.vo.CorpusListVo">
+        select
+               c.id as corpusId,
+               c.name as name,
+               u.nick_name as creator
+        from user_corpus uc
+        left join corpus c
+        on uc.corpus_id = c.id
+         left join user u
+         on c.creator_id = u.id
+        where uc.user_id = #{userId}
+    </select>
+
 </mapper>

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lghcode.briefbook.constant.Constant;
+import com.lghcode.briefbook.enums.ArticleEnum;
 import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
@@ -11,6 +12,7 @@ import com.lghcode.briefbook.mapper.*;
 import com.lghcode.briefbook.model.*;
 import com.lghcode.briefbook.model.param.PublishArticleParam;
 import com.lghcode.briefbook.model.param.RecommendArticleParam;
+import com.lghcode.briefbook.model.param.UpdateArticleParam;
 import com.lghcode.briefbook.model.vo.*;
 import com.lghcode.briefbook.service.ArticleService;
 import com.lghcode.briefbook.service.UserActionService;
@@ -206,5 +208,192 @@ public class ArticleServiceImpl implements ArticleService {
         }
         articleDetailVo.setCommentVoList(commentVos);
         return articleDetailVo;
+    }
+
+    /**
+     * 查看用户赞过的文章列表
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/25 9:59
+     */
+    @Override
+    public List<ArticleVo> queryUserLikeArticles(Long userId) {
+        return articleMapper.queryUserLikeArticles(userId);
+    }
+
+    /**
+     * 查看用户收藏过的文章列表
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/25 9:59
+     */
+    @Override
+    public List<ArticleVo> queryUserCollectArticles(Long userId) {
+        return articleMapper.queryUserCollectArticles(userId);
+    }
+
+    /**
+     * 查看用户的公开文章列表
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/25 14:55
+     */
+    @Override
+    public List<ArticleVo> queryUserPublicArticles(Long userId) {
+        return userArticleMapper.getUserArticles(userId);
+    }
+
+    /**
+     * 查看用户的私密文章列表
+     *
+     * @param userId 用户id
+     * @return List<ArticleVo>
+     * @Author lghcode
+     * @Date 2020/8/25 14:55
+     */
+    @Override
+    public List<ArticleVo> queryUserPrivateArticles(Long userId) {
+        return userArticleMapper.getUserPrivateArticles(userId);
+    }
+
+    /**
+     * 更新文章
+     *
+     * @param updateArticleParam 更新参数
+     * @Author lghcode
+     * @Date 2020/8/25 15:23
+     */
+    @Override
+    public void updateArticle(UpdateArticleParam updateArticleParam) {
+        Article article = Article.builder().id(updateArticleParam.getArticleId())
+                        .title(updateArticleParam.getTitle())
+                        .cont(updateArticleParam.getCont())
+                        .corpusId(updateArticleParam.getCorpusId())
+                        .wordCount(updateArticleParam.getWordCount())
+                        .updateTime(new Date())
+                        .build();
+        articleMapper.updateById(article);
+    }
+
+    /**
+     * 将文章设置为公开或私密
+     *
+     * @param articleId 文章id
+     * @param code      0-公开  1-私密
+     * @Author lghcode
+     * @Date 2020/8/25 15:23
+     */
+    @Override
+    public void setArticleAccess(Long articleId, int code) {
+        Article article = Article.builder().id(articleId).accessStatus(code).updateTime(new Date()).build();
+        articleMapper.updateById(article);
+    }
+
+    /**
+     * 删除文章
+     *
+     * @param articleId 文章id
+     * @Author lghcode
+     * @Date 2020/8/25 18:26
+     */
+    @Override
+    public void deleteArticle(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new BizException("要删除的文章不存在");
+        }
+        if (article.getStatus() == ArticleEnum.RECYCLE.getCode()){
+            throw new BizException("该文章已经放入回收站");
+        }
+        if (article.getStatus() == ArticleEnum.DELETE.getCode()){
+            throw new BizException("该文章已被彻底删除");
+        }
+        article.setStatus(ArticleEnum.RECYCLE.getCode());
+        article.setCacheDay(Constant.ARTICLE_CACHE_DAY);
+        articleMapper.updateById(article);
+    }
+
+    /**
+     * 根据文章id获取文章内容
+     *
+     * @param articleId 文章id不能为空
+     * @return Article
+     * @Author lghcode
+     * @Date 2020/8/25 18:52
+     */
+    @Override
+    public Article getOneById(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null || article.getStatus() == ArticleEnum.DELETE.getCode()){
+            throw new BizException("该文章不存在");
+        }
+        return article;
+    }
+
+    /**
+     * 获取用户的回收站文章列表
+     *
+     * @param curUserId 当前登录用户id
+     * @return ResultJson
+     * @Author lghcode
+     * @Date 2020/8/25 19:08
+     */
+    @Override
+    public List<RecycleBinListVo> getRecycleBinList(Long curUserId) {
+        return articleMapper.selectRecycleBinList(curUserId);
+    }
+
+    /**
+     * 彻底删除文章
+     *
+     * @param articleId 文章id
+     * @Author lghcode
+     * @Date 2020/8/25 18:26
+     */
+    @Override
+    public void deleteForeverArticle(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new BizException("要删除的文章不存在");
+        }
+        if (article.getStatus() == ArticleEnum.NORMAL.getCode()){
+            throw new BizException("该文章还不能够彻底删除，请先放到回收站");
+        }
+        if (article.getStatus() == ArticleEnum.DELETE.getCode()){
+            throw new BizException("该文章已被彻底删除");
+        }
+        article.setStatus(ArticleEnum.DELETE.getCode());
+        article.setCacheDay(0);
+        articleMapper.updateById(article);
+    }
+
+    /**
+     * 恢复文章
+     *
+     * @param articleId 文章id
+     * @Author lghcode
+     * @Date 2020/8/25 18:26
+     */
+    @Override
+    public void restoreArticle(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new BizException("要恢复的文章不存在");
+        }
+        if (article.getStatus() == ArticleEnum.NORMAL.getCode()){
+            throw new BizException("该文章已经是正常状态");
+        }
+        if (article.getStatus() == ArticleEnum.DELETE.getCode()){
+            throw new BizException("该文章不能够被恢复");
+        }
+        article.setStatus(ArticleEnum.NORMAL.getCode());
+        article.setCacheDay(0);
+        articleMapper.updateById(article);
     }
 }

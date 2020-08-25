@@ -191,4 +191,14 @@ public interface UserService {
      * @Date 2020/8/24 9:18
      */
     List<CorpusListVo> getUserCorpusList(Long userId);
+
+    /**
+     * 查看用户关注的文集列表
+     *
+     * @Author lghcode
+     * @param  userId 用户id
+     * @return List<CorpusListVo>
+     * @Date 2020/8/24 9:18
+     */
+    List<CorpusListVo> getUserLikeCorpusList(Long userId);
 }

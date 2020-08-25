@@ -147,4 +147,23 @@ public class CorpusServiceImpl implements CorpusService {
         }
 
     }
+
+    /**
+     * 新建文集
+     *
+     * @param loginUserId 当前登录用户id
+     * @param name        文集名
+     * @Author lghcode
+     * @Date 2020/8/25 9:59
+     */
+    @Override
+    public void create(Long loginUserId, String name) {
+        Integer count = corpusMapper.selectCount(new QueryWrapper<Corpus>().lambda().eq(Corpus::getName,name)
+                                .eq(Corpus::getCreatorId,loginUserId));
+        if (count > 0) {
+            throw new BizException("该文集已经存在");
+        }
+        Corpus corpus = Corpus.builder().name(name).creatorId(loginUserId).createTime(new Date()).build();
+        corpusMapper.insert(corpus);
+    }
 }

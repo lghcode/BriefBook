@@ -40,4 +40,14 @@ public interface CorpusService {
      * @Date 2020/8/24 11:33
      */
     void followCorpus(Long currentUserId, Long corpusId, Integer type);
+
+    /**
+     * 新建文集
+     *
+     * @Author lghcode
+     * @param loginUserId 当前登录用户id
+     * @param name 文集名
+     * @Date 2020/8/25 9:59
+     */
+    void create(Long loginUserId, String name);
 }

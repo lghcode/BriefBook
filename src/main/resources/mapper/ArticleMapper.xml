@@ -32,4 +32,57 @@
         where a.corpus_id = #{corpusId}
           and a.status = 0
     </select>
+
+    <select id="queryUserLikeArticles" resultType="com.lghcode.briefbook.model.vo.ArticleVo">
+        select
+               a.id,
+               a.title,
+               a.cont,
+               a.diamond_count as diamondCount,
+               a.read_count as readCount,
+               a.like_count as likeCount,
+               a.publish_time as publishTime,
+               (select count(*) from comment c where c.article_id = a.id) as commentCount
+        from  user_article ua
+        left join article a
+        on ua.article_id = a.id
+        where ua.user_id = #{userId}
+        and ua.type = 1
+        and a.status = 0
+        and a.access_status = 0
+    </select>
+
+
+    <select id="queryUserCollectArticles" resultType="com.lghcode.briefbook.model.vo.ArticleVo">
+        select
+               a.id,
+               a.title,
+               a.cont,
+               a.diamond_count as diamondCount,
+               a.read_count as readCount,
+               a.like_count as likeCount,
+               a.publish_time as publishTime,
+               (select count(*) from comment c where c.article_id = a.id) as commentCount
+        from  user_article ua
+                  left join article a
+                      on ua.article_id = a.id
+        where ua.user_id = #{userId}
+          and ua.type = 3
+          and a.status = 0
+          and a.access_status = 0
+    </select>
+
+    <select id="selectRecycleBinList" resultType="com.lghcode.briefbook.model.vo.RecycleBinListVo">
+        select
+        a.id as articleId,
+        a.title as articleTitle,
+        a.cache_day as cacheDay
+        from user_article ua
+        left join article a
+        on ua.article_id = a.id
+        where ua.user_id = #{curUserId}
+        and ua.type = 0
+        and a.status = 1
+    </select>
+
 </mapper>
