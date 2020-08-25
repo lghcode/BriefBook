@@ -154,4 +154,10 @@ public interface ArticleService {
      * @Date 2020/8/25 18:26
      */
     void restoreArticle(Long articleId);
+
+    /**
+     * 每天对回收站的文章的剩余天数减少1天，如果剩余天数为零，则彻底删除该文章
+     * 每天凌晨0点1分执行
+     */
+    void runRecycleArticleTask();
 }

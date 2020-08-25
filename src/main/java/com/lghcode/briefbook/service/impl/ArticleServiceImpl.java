@@ -396,4 +396,24 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCacheDay(0);
         articleMapper.updateById(article);
     }
+
+    /**
+     * 每天对回收站的文章的剩余天数减少1天，如果剩余天数为零，则彻底删除该文章
+     * 每天凌晨0点1分执行
+     */
+    @Override
+    public void runRecycleArticleTask() {
+        List<Article> articles = articleMapper.selectList(new QueryWrapper<Article>().lambda().eq(Article::getStatus,ArticleEnum.RECYCLE.getCode()));
+        if (articles != null){
+            for (Article article : articles) {
+                //暂存天数减一
+                if (article.getCacheDay() > 1){
+                    article.setCacheDay(article.getCacheDay()-1);
+                }else{
+                    //到期自动彻底删除
+                    deleteForeverArticle(article.getId());
+                }
+            }
+        }
+    }
 }
