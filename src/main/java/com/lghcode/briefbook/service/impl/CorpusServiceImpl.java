@@ -2,6 +2,7 @@ package com.lghcode.briefbook.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lghcode.briefbook.constant.Constant;
+import com.lghcode.briefbook.enums.UserActionEnum;
 import com.lghcode.briefbook.enums.UserEnum;
 import com.lghcode.briefbook.exception.BizException;
 import com.lghcode.briefbook.mapper.ArticleMapper;
@@ -15,6 +16,7 @@ import com.lghcode.briefbook.model.vo.ArticleVo;
 import com.lghcode.briefbook.model.vo.CorpusDetailVo;
 import com.lghcode.briefbook.model.vo.UserBaseVo;
 import com.lghcode.briefbook.service.CorpusService;
+import com.lghcode.briefbook.service.UserActionService;
 import com.lghcode.briefbook.service.UserArticleService;
 import com.lghcode.briefbook.util.JwtTokenUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +51,9 @@ public class CorpusServiceImpl implements CorpusService {
 
     @Autowired
     private UserArticleService userArticleService;
+
+    @Autowired
+    private UserActionService userActionService;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -139,11 +144,15 @@ public class CorpusServiceImpl implements CorpusService {
             }
             UserCorpus userCorpus = UserCorpus.builder().userId(currentUserId).corpusId(corpusId).createTime(new Date()).build();
             userCorpusMapper.insert(userCorpus);
+            //同步用户动态表
+            userActionService.newAction(currentUserId, UserActionEnum.SUBSCRIPTION.getCode(),corpusId,UserActionEnum.CORPUS.getCode());
         }else if(type == UserEnum.CANNEL_FOLLOW.getCode()){
             //取消关注
             userCorpusMapper.delete(new QueryWrapper<UserCorpus>().lambda()
                     .eq(UserCorpus::getUserId,currentUserId)
                     .eq(UserCorpus::getCorpusId,corpusId));
+            //同步用户动态表
+            userActionService.cannelAction(currentUserId,UserActionEnum.SUBSCRIPTION.getCode(),corpusId);
         }
 
     }
