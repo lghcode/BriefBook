@@ -31,6 +31,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addInterceptor(authInterceptor())
 				.addPathPatterns("/**")
 				.excludePathPatterns("/oss/**")
+				.excludePathPatterns("/file/**")
 				.excludePathPatterns("/user/loginSms")
 				.excludePathPatterns("/user/loginPw")
 				.excludePathPatterns("/user/sendSms")

@@ -61,3 +61,5 @@ jwt:
   secret: defaultSecret
   expiration: 2592000
   md5Key: randomKey
+server:
+  port: 8181
